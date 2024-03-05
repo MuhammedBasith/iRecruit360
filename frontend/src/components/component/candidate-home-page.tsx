@@ -12,23 +12,25 @@ export default function CandidateHomePage() {
         <h1 className="text-3xl font-bold">Your Interview</h1>
         <p className="text-gray-500 dark:text-gray-400">Enter the code provided by your interviewer</p>
       </div>
-      <Card className="w-full max-w-sm rounded-xl" style={{ backgroundColor: 'white' }}>
+      <Card className="w-full max-w-sm rounded-xl p-6" style={{ backgroundColor: 'white' }}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="code">Enter Your Code</Label>
             {/* <Input id="code" placeholder="Code" required /> */}
-            <HStack className="flex justify-center ">
-              <PinInput>
-                <PinInputField />
-                <PinInputField />
-                <PinInputField />
-                <PinInputField />
+            <HStack className="flex justify-center mb-4">
+              <PinInput size='lg'>
+                <PinInputField style={{ color: 'black' }} />
+                <PinInputField style={{ color: 'black' }} />
+                <PinInputField style={{ color: 'black' }} />
+                <PinInputField style={{ color: 'black' }} />
+                <PinInputField style={{ color: 'black' }} />
               </PinInput>
-          </HStack>
+            </HStack>
           </div>
           <Button className="w-full bg-black">Submit</Button>
         </CardContent>
       </Card>
+      <div className="h-8"></div> {/* Adding space below the card */}
     </div>
   );
 }
