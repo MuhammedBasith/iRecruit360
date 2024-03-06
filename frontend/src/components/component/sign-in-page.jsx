@@ -1,6 +1,7 @@
 "use client"
 var md5 = require('md5')
 import Link from "next/link"
+import Cookies from "js-cookie"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -30,6 +31,7 @@ export default function SignInPage() {
         });
 
         if (response.status === 200) {
+            Cookies.set('loggedIn', email)
             router.push('/dashboard');
             toast({
               title: 'Logged in successfully.',
@@ -49,6 +51,7 @@ export default function SignInPage() {
           })
         }
     } catch (error) {
+      console.log(error)
       toast({
         title: 'Error Signing In',
         description: "Something went wrong. Please try again.",
