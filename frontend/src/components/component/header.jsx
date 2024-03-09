@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function Header({ showSignInButton = true, showAdminButton = true, showSignUpButton = true, isSignupPage = false, showAdminHomeButton= false}) {
+export default function Header({ showSignInButton = true, showAdminButton = true, showSignUpButton = true, isSignupPage = false, showAdminHomeButton= false, isLoggedin = false}) {
     return (
       <header className="flex h-20 w-full items-center px-4 md:px-6 z-10">
         <Link href="/" className="mr-6 hidden lg:flex">
@@ -28,12 +28,17 @@ export default function Header({ showSignInButton = true, showAdminButton = true
           <Link href="/admin">
             <Button className="ml-4 bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out">Admin</Button>
           </Link>
-        )}
-        {showAdminHomeButton && (
-        <Link href="/">
-          <Button className="ml-4 bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out">Home</Button>
-        </Link>
-        )}
+          )}
+          {showAdminHomeButton && (
+          <Link href="/">
+            <Button className="ml-4 bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out">Home</Button>
+          </Link>
+          )}
+          {isLoggedin && (
+          <Link href="/">
+            <Button className="ml-4 bg-red-600 text-white hover:bg-red-700 transition duration-300 ease-in-out">Logout</Button>
+          </Link>
+          )}
         </div>
       </header>
     );
