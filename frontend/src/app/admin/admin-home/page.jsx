@@ -1,4 +1,4 @@
-import AdminHome from '../../components/component/admin-home'
+import AdminHome from '../../../components/component/admin-home'
 
 export default function AdminHomePage(){
     return(

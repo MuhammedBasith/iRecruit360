@@ -7,7 +7,6 @@ export default function ScheduleInterview() {
   return (
 
     <div className="min-h-screen flex flex-col">
-      <Header />
       <Header showSignUpButton={false} showAdminButton={false} showSignInButton={false} isLoggedin={true} />
       <div className="flex justify-center items-center flex-grow" style={{ marginTop: "-5rem" }}> {/* Increased negative margin-top */}
         <div className="mx-auto max-w-5xl px-4 space-y-6">

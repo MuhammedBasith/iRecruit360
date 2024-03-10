@@ -34,10 +34,7 @@ export default function AdminSignInPage() {
       </div>
       <footer className="pb-4 lg:pb-6 xl:pb-8">
         <div className=" flex justify-center gap-4 px-6 flex-shrink-0">
-          <Link className="m-0 inline-flex items-center space-x-2 text-sm" href="#">
-            <GithubIcon className="h-4 w-4" />
-            <span className="font-medium">Github</span>
-          </Link>
+
           <Link className="m-0 inline-flex items-center space-x-2 text-sm" href="#">
             <StoreIcon className="h-4 w-4" />
             <span className="font-medium">Contact Sales</span>

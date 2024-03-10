@@ -61,7 +61,7 @@ export default function SignUpPage() {
             <Input id="name" placeholder="Jhon Smith" onChange={(e) => setFullName(e.target.value)} type="email" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Work Email</Label>
+            <Label htmlFor="email">Email</Label>
             <Input id="email" placeholder="jhon@udemy.com" onChange={(e) => setEmail(e.target.value)} type="email" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
           <div className="space-y-2">
@@ -73,10 +73,7 @@ export default function SignUpPage() {
       </div>
       <footer className="pb-4 lg:pb-6 xl:pb-8">
         <div className=" flex justify-center gap-4 px-6 flex-shrink-0">
-          <Link className="m-0 inline-flex items-center space-x-2 text-sm" href="#">
-            <GithubIcon className="h-4 w-4" />
-            <span className="font-medium">Github</span>
-          </Link>
+
           <Link className="m-0 inline-flex items-center space-x-2 text-sm" href="#">
             <StoreIcon className="h-4 w-4" />
             <span className="font-medium">Contact Sales</span>
