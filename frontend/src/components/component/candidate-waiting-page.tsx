@@ -6,7 +6,6 @@ export default function CandidateWaitingPage() {
   return (
     <>
       <Header showSignUpButton={false} showAdminButton={false} showSignInButton={false} isLoggedin={false} isCandidateLoggedin={true} />
-
       <div style={{ marginTop: '200px' }}>
       <Card className="max-w-sm mx-auto" style={{ backgroundColor: 'white', padding: '25px', paddingBottom: '10px'}}>
         <CardContent className="space-y-4">

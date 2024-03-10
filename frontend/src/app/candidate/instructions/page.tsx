@@ -1,7 +1,9 @@
-import BentoGridSecondDemo from '../../../components/component/candidate-instruction-page'
+import CandidateInstructionsCardBased from '../../../components/component/candidate-instructions-card-based'
 
 export default function Page(){
     return(
-        <BentoGridSecondDemo />
+        <>
+            <CandidateInstructionsCardBased />
+        </>
     )
 }
