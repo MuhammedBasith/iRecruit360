@@ -1,13 +1,9 @@
-from flask import Flask, request, jsonify
-from firebase_admin import credentials
-from firebase_admin import firestore
-from flask_cors import CORS, cross_origin
-import firebase_admin
+from flask import Flask, request, jsonify, make_response
+from firebase_admin import credentials, firestore, initialize_app
+from flask_cors import CORS
 
 cred = credentials.Certificate('firestore_cred.json')
-
-app = firebase_admin.initialize_app(cred)
-
+app = initialize_app(cred)
 db = firestore.client()
 
 flask_app = Flask(__name__)
@@ -31,9 +27,7 @@ def login():
     data = request.json
     email = data['email']
     pwd = data['password']
-    # print(pwd)
 
-    # Query Firestore for the user with the provided email
     user_ref = db.collection('users').where('email', '==', email).stream()
     user_data = [doc.to_dict() for doc in user_ref]
 
@@ -43,9 +37,23 @@ def login():
     user = user_data[0]
 
     if pwd == user['hashedPassword']:
-        return jsonify({'message': 'Login successful'}), 200
+        response = jsonify({'message': 'Login successful', 'user': user})
+        return response, 200
     else:
         return jsonify({'error': 'Invalid password'}), 401
+
+
+@flask_app.route('/admin/login', methods=['POST'])
+def admin_login():
+    data = request.json
+    email = data.get('email')
+    hashed_password = data.get('hashed_password')
+
+    hr_ref = db.collection('hr').where('email', '==', email).where('password', '==', hashed_password).limit(1).get()
+    if len(hr_ref) == 1:
+        return jsonify({'message': 'Success'}), 200
+    else:
+        return jsonify({'message': 'Error: Invalid credentials'}), 401
 
 
 if __name__ == '__main__':
