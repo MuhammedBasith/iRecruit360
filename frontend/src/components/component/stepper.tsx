@@ -22,11 +22,13 @@ const steps = [
     { title: 'Round Three', description: 'Select Rooms' },
   ]
   
-export default function MyStepper() {
-    const { activeStep } = useSteps({
-      index: 1,
-      count: steps.length,
-    })
+
+  export default function MyStepper({ activeStep }) {
+    const steps = [
+      { title: 'Round One', description: 'Basic Questions' },
+      { title: 'Round Two', description: 'Date & Time' },
+      { title: 'Round Three', description: 'Select Rooms' },
+    ];
   
     return (
       <Stepper index={activeStep} colorScheme='gray'>
@@ -49,5 +51,5 @@ export default function MyStepper() {
           </Step>
         ))}
       </Stepper>
-    )
+    );
   }

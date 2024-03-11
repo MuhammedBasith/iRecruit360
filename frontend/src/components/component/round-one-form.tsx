@@ -1,3 +1,5 @@
+'use client'
+
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { RadioGroup } from "@/components/ui/radio-group"
@@ -5,14 +7,35 @@ import { Select } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import Header from "./header"
 import MyStepper from "./stepper"
+import TransitionExample from "./confirmation-alert"
+import { useRouter } from 'next/navigation';
+import { useDisclosure } from '@chakra-ui/react';
+import React from 'react';
+import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+    AlertDialogCloseButton
+  } from '@chakra-ui/react';
+
 
 export function RoundOneForm() {
+  const router = useRouter();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const handleYesClick = () => {
+    router.push('/candidate/round-two');
+};
   return (
     <>
       <Header showSignUpButton={false} showAdminButton={false} showSignInButton={false} isLoggedin={false} isCandidateLoggedin={true} />
 
       <div className="mx-auto max-w-3xl space-y-8" style={{marginTop: '70px'}}>
-      <MyStepper />
+        <MyStepper activeStep={0}/>
         <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
@@ -53,14 +76,6 @@ export function RoundOneForm() {
                 <option value="female">Female</option>
                 <option value="binary">Binary</option>
               </select>
-            </div>
-
-            <div className="space-y-2">
-              <RadioGroup>
-                <div />
-                <div />
-                <div />
-              </RadioGroup>
             </div>
           </div>
         </div>
@@ -131,12 +146,34 @@ export function RoundOneForm() {
         </div>
 
         <div style={{ marginBottom: '100px' }}>
-          <Button
-            className='w-full bg-black text-white hover:bg-gray-800'
-          >
-            Next Round
-          </Button>
-        </div>
+        <Button onClick={onOpen} className="w-full bg-black text-white hover:bg-gray-800">
+          Next Round
+        </Button>
+      </div>
+      <AlertDialog
+        motionPreset="slideInBottom"
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isOpen={isOpen}
+        isCentered
+      >
+        <AlertDialogOverlay />
+        <AlertDialogContent>
+          <AlertDialogHeader>Proceed to Next Round?</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+          Are you sure you want to proceed to the next round?
+          </AlertDialogBody>
+          <AlertDialogFooter>
+          <Button className="hover:bg-gray-200 hover:text-gray-700 border border-gray-700 mr-2" onClick={onClose}>
+              No
+            </Button>
+            <Button className="bg-black text-white hover:bg-gray-800" onClick={handleYesClick}>
+              Yes
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </>
   )
