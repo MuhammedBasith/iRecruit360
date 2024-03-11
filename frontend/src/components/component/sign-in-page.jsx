@@ -23,7 +23,6 @@ export default function SignInPage() {
   const handleSignIn = async () => {
     try {
         const hashedPassword = md5(password)
-        console.log(hashedPassword)
 
         const response = await axios.post('http://localhost:8000/api/login', {
             email: email,
@@ -37,7 +36,7 @@ export default function SignInPage() {
               title: 'Logged in successfully.',
               description: "You’ve successfully logged in to your account.",
               status: 'success',
-              duration: 9000,
+              duration: 7000,
               isClosable: true,
             })
 

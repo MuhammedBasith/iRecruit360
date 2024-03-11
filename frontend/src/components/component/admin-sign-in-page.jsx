@@ -1,10 +1,60 @@
+'use client'
+
+var md5 = require('md5')
+import Cookies from "js-cookie"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from "next/link"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Header from '@/components/component/header'
+import { useToast } from '@chakra-ui/react'
+
 
 export default function AdminSignInPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const router = useRouter();
+  const toast = useToast()
+
+  const handleSignIn = async () => {
+    const hashedPassword = md5(password);
+
+    try {
+      const response = await fetch('http://localhost:8000/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, hashed_password: hashedPassword }),
+      });
+
+      if (response.ok) {
+        Cookies.set('adminLoggedIn', email)
+        router.push('/admin/admin-home');
+        toast({
+          title: 'Logged in successfully.',
+          description: "You’ve successfully logged in to your account.",
+          status: 'success',
+          duration: 7000,
+          isClosable: true,
+        })
+      } else {
+        toast({
+          title: 'Error Signing In',
+          description: "Invalid Credentials. Contact Sales.",
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        })
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     (<div className="flex flex-col h-screen w-full">
 
@@ -18,13 +68,13 @@ export default function AdminSignInPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" placeholder="jhon@udemy.com" type="email" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
+            <Input id="email" placeholder="jhon@udemy.com" type="email" onChange={(e) => setEmail(e.target.value)} className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" placeholder='**********' type="password" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
+            <Input id="password" placeholder='**********' type="password" onChange={(e) => setPassword(e.target.value)} className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
-          <Button className="w-full bg-black text-white hover:bg-gray-800">Sign in</Button>
+          <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSignIn}>Sign in</Button>
           <div className="flex justify-end">
             <Link className="text-sm underline" href="#">
               Forgot your password?
@@ -60,27 +110,6 @@ function MountainIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round">
       <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>)
-  );
-}
-
-
-function GithubIcon(props) {
-  return (
-    (<svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path
-        d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
     </svg>)
   );
 }
