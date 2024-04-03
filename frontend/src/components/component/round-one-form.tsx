@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button"
 import Header from "./header"
 import MyStepper from "./stepper"
 import TransitionExample from "./confirmation-alert"
+import { Container, Button as MyButton } from "@mui/material/";
 import { useRouter } from 'next/navigation';
 import { useDisclosure } from '@chakra-ui/react';
-import React from 'react';
+import { QuestionCard } from "../component/index";
+import questions from '../../../data/data';
+import React, { useState } from 'react';
 import {
     AlertDialog,
     AlertDialogBody,
@@ -27,9 +30,21 @@ export function RoundOneForm() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
 
+  const [responses, setResponses] = useState([]);
+
   const handleYesClick = () => {
     router.push('/candidate/round-two');
 };
+
+  const handleFormChange = (data) => {
+    // Remove existing response with the same number (no)
+    console.log(responses)
+    const updatedResponses = responses.filter((response) => response.no !== data.no);
+
+    // Add new response to the updatedResponses array
+    updatedResponses.push(data);
+    setResponses(updatedResponses);
+  };
   return (
     <>
       <Header showSignUpButton={false} showAdminButton={false} showSignInButton={false} isLoggedin={false} isCandidateLoggedin={true} />
@@ -106,44 +121,37 @@ export function RoundOneForm() {
             <Input accept=".pdf" id="resume" type="file" />
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <StarIcon className="h-6 w-6" />
-              <h2 className="text-lg font-bold">Self-rating</h2>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="communication">Communication and interpersonal skills</Label>
-              <Select id="communication">
-                <option>1 - Poor</option>
-                <option>2 - Fair</option>
-                <option>3 - Good</option>
-                <option>4 - Very Good</option>
-                <option>5 - Excellent</option>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="teamwork">Teamwork and collaboration</Label>
-              <Select id="teamwork">
-                <option>1 - Poor</option>
-                <option>2 - Fair</option>
-                <option>3 - Good</option>
-                <option>4 - Very Good</option>
-                <option>5 - Excellent</option>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="problem-solving">Problem-solving</Label>
-              <Select id="problem-solving">
-                <option>1 - Poor</option>
-                <option>2 - Fair</option>
-                <option>3 - Good</option>
-                <option>4 - Very Good</option>
-                <option>5 - Excellent</option>
-              </Select>
-            </div>
-          </div>
-        </div>
+
+
+
+
+
+        <Container
+          component="form"
+          sx={{
+            minWidth: '100%',
+            mx: '0rem',
+            textAlign: 'center',
+            padding: '4',
+            border: '1px solid #D1D5DB',
+            borderRadius: '0.375rem',
+          }}
+        >
+          {questions.map((question) => (
+            <QuestionCard
+              key={question.no}
+              question={question.text}
+              no={question.no}
+              onRadioClick={handleFormChange}
+            />
+          ))}
+        </Container>
+
+
+
+
+
+
 
         <div style={{ marginBottom: '100px' }}>
         <Button onClick={onOpen} className="w-full bg-black text-white hover:bg-gray-800">

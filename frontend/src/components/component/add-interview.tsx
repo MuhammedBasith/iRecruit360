@@ -1,11 +1,32 @@
+'use client'
+
 import Link from "next/link"
 import Header from "./header"
 import { CardTitle, CardDescription, CardHeader, CardContent, Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { useRouter } from 'next/navigation';
+
 
 export default function AddInterview() {
+
+  const router = useRouter();
+
+  const [interviewName, setInterviewName] = useState('');
+
+  const handleInputChange = (e: any) => {
+    setInterviewName(e.target.value); 
+  };
+
+  const saveInterviewName = () => {
+    localStorage.removeItem('interviewName');
+    localStorage.setItem('interviewName', interviewName);
+    router.push('/admin/add-questions')
+  }
+
+
   return (
     <div>
       <Header showSignUpButton={false} showAdminButton={false} showSignInButton={false} isLoggedin={true} />
@@ -21,9 +42,9 @@ export default function AddInterview() {
                 <Label className="form-label" htmlFor="interview-name">
                   Interview Name
                 </Label>
-                <Input id="interview-name" placeholder="Enter the name of the interview" className="bg-white text-gray-800 placeholder-gray-400 border border-gray-200 rounded-lg p-3" style={{ backgroundColor: 'white' }} />
+                <Input id="interview-name" placeholder="Enter the name of the interview" className="bg-white text-gray-800 placeholder-gray-400 border border-gray-200 rounded-lg p-3" style={{ backgroundColor: 'white' }} value={interviewName} onChange={handleInputChange}/>
               </div>
-              <Button className="w-full bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out">Create Interview</Button> {/* Add className prop for dark theme */}
+              <Button className="w-full bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" disabled={!interviewName.trim()} onClick={saveInterviewName}>Create Interview</Button>
             </CardContent>
           </div>
         </main>

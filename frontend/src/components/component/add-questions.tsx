@@ -1,21 +1,27 @@
 'use client'
+
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import Header from "./header"
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
+
 
 export default function AddCandidates() {
-  const [fileName, setFileName] = useState(null);
+  const router = useRouter();
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFileName(file.name);
-    } else {
-      setFileName(null);
-    }
+  const [questions, setQuestions] = useState('');
+
+  const handleInputChange = (e: any) => {
+    setQuestions(e.target.value); 
   };
+
+  const saveQuestions = () => {
+    localStorage.removeItem('questions');
+    localStorage.setItem('questions', questions);
+    router.push('/admin/add-candidates')
+  }
   
   return (
     <>
@@ -27,10 +33,10 @@ export default function AddCandidates() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="candidates">Questions</Label>
-          <Textarea className="min-h-[200px]" id="candidates" placeholder="Enter each questions seperated by commas." style={{ backgroundColor: 'white' }} />
+          <Textarea className="min-h-[200px]" id="candidates" placeholder="Enter each questions seperated by commas." style={{ backgroundColor: 'white' }} value={questions} onChange={handleInputChange} />
         </div>
         <div className="flex flex-col gap-2">
-          <Button className="w-full bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out">Submit</Button>
+          <Button className="w-full bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" disabled={!questions.trim()} onClick={saveQuestions}>Submit</Button>
         </div>
       </div>
     </div>
