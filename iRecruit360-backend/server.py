@@ -66,7 +66,8 @@ def create_interview():
                 'round_two': {'submitted': False},
                 'round_three': {'submitted': False},
                 'started_interview': False,
-                'unique_code': new_code
+                'unique_code': new_code,
+                'status': 'absent'
             })
 
         return jsonify({'message': 'Interview created successfully'}), 200
@@ -493,6 +494,57 @@ def update_candidate_status():
         return jsonify({'message': f'Email sent and candidate {action}ed successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/verifyInterviewCode', methods=['POST'])
+def verify_interview_code():
+    try:
+        data = request.json
+        candidate_email = data.get('email')
+        unique_code = data.get('code')
+
+        # Query Firestore to find interviews matching the candidate's email and unique code
+        interviews_ref = db.collection_group('candidates').where('email', '==', candidate_email).where('unique_code',
+                                                                                                       '==',
+                                                                                                       int(unique_code)).stream()
+
+        interviews = []
+        for doc in interviews_ref:
+            candidate_data = doc.to_dict()
+            candidate_name = candidate_data.get('name')
+            # Get the interview name and scheduled datetime from the parent document
+            parent_ref = doc.reference.parent.parent
+            parent_doc = parent_ref.get()
+            if parent_doc.exists:
+                interview_data = parent_doc.to_dict()
+                print(interview_data)
+                interview_name = interview_data.get('interview_name')
+                interview_datetime = interview_data.get('scheduled_datetime')
+
+                interviews.append({
+                    'candidate_name': candidate_name,
+                    'interview_name': interview_name,
+                    'interview_datetime': interview_datetime
+                })
+
+        if interviews:
+            # Candidate has interviews associated with the provided code and email
+            return jsonify({
+                'success': True,
+                'interviews': interviews
+            }), 200
+        else:
+            # No interviews found for the provided code and email
+            return jsonify({
+                'success': False,
+                'message': 'No interviews found for the provided code and email'
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 if __name__ == '__main__':
