@@ -20,12 +20,10 @@ export default function ProgressPage() {
     try {
       const interviewData = {
         interviewName: localStorage.getItem('interviewName'),
-        questions: localStorage.getItem('questions'),
-        candidateData: localStorage.getItem('candidateData'),
         interviewDateTime: localStorage.getItem('interviewDateTime')
       };
   
-      const response = await fetch('http://localhost:8000/api/createInterview', {
+      const response = await fetch('http://localhost:8000/api/rescheduleInterview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -41,11 +39,11 @@ export default function ProgressPage() {
       setProgress(100);
       setProgressText('Emails sent successfully')
       setIsProgressBarComplete(true);
-
+      localStorage.removeItem('interviewName') //TODO
       
       // Wait for 3 seconds before redirecting to home page
       setTimeout(() => {
-        router.push('/admin/admin-home');
+        router.push('/admin/show-interviews');
         toast({
           title: 'Action Completed Successfully',
           description: "The action has been successfully completed.",
