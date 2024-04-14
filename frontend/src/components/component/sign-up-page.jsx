@@ -17,9 +17,12 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [clicked, setClicked] = useState(false);
+  
 
   const handleSignUp = async () => {
       try {
+          setClicked(true)
           console.log(email);
           const hashedPassword = md5(password)
           await axios.post('http://localhost:8000/signup', {
@@ -36,6 +39,7 @@ export default function SignUpPage() {
             isClosable: true,
           })
       } catch (error) {
+        setClicked(false)
         toast({
           title: 'Error signing up',
           description: "Something went wrong. Please try again.",
@@ -68,7 +72,7 @@ export default function SignUpPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" placeholder='**********' onChange={(e) => setPassword(e.target.value)} type="password" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
-          <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSignUp}>Sign Up</Button>
+          <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSignUp} disabled={clicked} >Sign Up</Button>
         </div>
       </div>
       <footer className="pb-4 lg:pb-6 xl:pb-8">

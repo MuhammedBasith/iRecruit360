@@ -15,11 +15,13 @@ import { useToast } from '@chakra-ui/react'
 export default function AdminSignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [clicked, setClicked] = useState(false);
 
   const router = useRouter();
   const toast = useToast()
 
   const handleSignIn = async () => {
+    setClicked(true)
     const hashedPassword = md5(password);
 
     try {
@@ -42,6 +44,7 @@ export default function AdminSignInPage() {
           isClosable: true,
         })
       } else {
+        setClicked(false)
         toast({
           title: 'Error Signing In',
           description: "Invalid Credentials. Contact Sales.",
@@ -74,7 +77,7 @@ export default function AdminSignInPage() {
             <Label htmlFor="password">Password</Label>
             <Input id="password" placeholder='**********' type="password" onChange={(e) => setPassword(e.target.value)} className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }} />
           </div>
-          <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSignIn}>Sign in</Button>
+          <Button className="w-full bg-black text-white hover:bg-gray-800" onClick={handleSignIn} disabled={clicked}>Sign in</Button>
           <div className="flex justify-end">
             <Link className="text-sm underline" href="#">
               Forgot your password?

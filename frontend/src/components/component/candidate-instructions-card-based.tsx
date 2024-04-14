@@ -6,9 +6,16 @@ import { Button } from '@/components/ui/button';
 import { CardHeader, CardContent, Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import Header from './header';
+import { useRouter } from 'next/navigation';
+
 
 export default function CandidateInstructionsCardBased() {
   const [isChecked, setIsChecked] = useState(false);
+  const router = useRouter();
+
+  const handleStartTest = () =>{
+    router.push('/candidate/round-one')
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -90,6 +97,7 @@ export default function CandidateInstructionsCardBased() {
           <Button
             className={`w-full ${isChecked ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-400 text-white cursor-not-allowed'}`}
             disabled={!isChecked}
+            onClick={handleStartTest}
           >
             Next
           </Button>

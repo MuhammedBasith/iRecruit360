@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+
 
 export default function ViewResultTable() {
+  const router = useRouter();
   const [candidates, setCandidates] = useState([]);
 
   useEffect(() => {
@@ -24,13 +27,21 @@ export default function ViewResultTable() {
     fetchCandidates();
   }, []);
 
+  const handleViewClick = (candidate) => {
+    localStorage.removeItem('CandidateNameForReport');
+    localStorage.removeItem('CandidateEmailForReport');
+    localStorage.setItem('CandidateNameForReport', candidate.name);
+    localStorage.setItem('CandidateEmailForReport', candidate.email);
+    router.push('/admin/candidate-report')
+  }
+
   const getStatusLabel = (submitted) => {
     return submitted ? 'Under Review' : 'Absent';
   };
 
   const handleAction = async (candidate, action) => {
     try {
-      const updatedCandidates = candidates.map((c) => {
+      const updatedCandidates: any = candidates.map((c) => {
         if (c.name === candidate.name) {
           return { ...c, status: action === 'accept' ? 'Accepted' : 'Rejected' };
         }
@@ -77,6 +88,7 @@ export default function ViewResultTable() {
                       <Button
                         size="sm"
                         className="bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out"
+                        onClick={() => handleViewClick(candidate)}
                       >
                         View
                       </Button>
