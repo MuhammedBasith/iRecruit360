@@ -18,19 +18,24 @@ export default function WebcamVideo() {
 
   const handleStartCaptureClick = useCallback(() => {
     setCapturing(true);
-    mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-      mimeType: "video/webm",
-    });
-    mediaRecorderRef.current.addEventListener(
-      "dataavailable",
-      handleDataAvailable
-    );
-    mediaRecorderRef.current.start();
+    const webcamStream = webcamRef.current.video.srcObject;
+    if (webcamStream) {
+      mediaRecorderRef.current = new MediaRecorder(webcamStream, {
+        mimeType: "video/webm",
+      });
+      mediaRecorderRef.current.addEventListener(
+        "dataavailable",
+        handleDataAvailable
+      );
+      mediaRecorderRef.current.start();
+    }
   }, [webcamRef, setCapturing, mediaRecorderRef, handleDataAvailable]);
 
   const handleStopCaptureClick = useCallback(() => {
-    mediaRecorderRef.current.stop();
-    setCapturing(false);
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setCapturing(false);
+    }
   }, [mediaRecorderRef, setCapturing]);
 
   const handleDownload = useCallback(() => {
@@ -50,10 +55,6 @@ export default function WebcamVideo() {
     }
   }, [recordedChunks]);
 
-  const videoConstraints = {
-    facingMode: "user",
-  };
-
   return (
     <div className="Container">
       <Webcam
@@ -61,7 +62,14 @@ export default function WebcamVideo() {
         muted={true}
         mirrored={true}
         ref={webcamRef}
-        videoConstraints={videoConstraints}
+        videoConstraints={{
+          facingMode: "user",
+        }}
+        onUserMedia={(mediaStream) => {
+          if (mediaStream && webcamRef.current) {
+            webcamRef.current.video.srcObject = mediaStream;
+          }
+        }}
       />
       {capturing ? (
         <button onClick={handleStopCaptureClick}>Stop Capture</button>

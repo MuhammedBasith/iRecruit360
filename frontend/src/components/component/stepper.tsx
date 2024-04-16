@@ -26,8 +26,8 @@ const steps = [
   export default function MyStepper({ activeStep }) {
     const steps = [
       { title: 'Round One', description: 'Basic Questions' },
-      { title: 'Round Two', description: 'Date & Time' },
-      { title: 'Round Three', description: 'Select Rooms' },
+      { title: 'Round Two', description: 'Video Analysis' },
+      { title: 'Round Three', description: 'Skill Check' },
     ];
   
     return (

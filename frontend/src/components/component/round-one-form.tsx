@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button"
 import Header from "./header"
 import MyStepper from "./stepper"
 import TransitionExample from "./confirmation-alert"
-import { Container, Button as MyButton } from "@mui/material/";
+// import { Container, Button as MyButton } from "@mui/material/";
 import { useRouter } from 'next/navigation';
 import { useDisclosure } from '@chakra-ui/react';
 import { QuestionCard } from "../component/index";
 import questions from '../../../data/data';
 import React, { useState } from 'react';
+import { CardTitle, CardDescription, CardHeader, CardContent, Card } from "@/components/ui/card"
 import {
     AlertDialog,
     AlertDialogBody,
@@ -31,10 +32,66 @@ export function RoundOneForm() {
   const cancelRef = React.useRef();
 
   const [responses, setResponses] = useState([]);
+  const [personalityResponses, setPersonalityResponses] = useState(new Array(50).fill(0));
+  const [dob, setDob] = useState('');
+  const [firstName, setfirstName] = useState('');
+  const [clicked, setClicked] = useState(false);
+  const [lastName, setlastName] = useState('');
+  const [gender, setGender] = useState('male');
+  const [email, setEmail] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
 
-  const handleYesClick = () => {
-    router.push('/candidate/round-two');
-};
+
+  const handlePersonalityResponseChange = (questionNo, value) => {
+    const updatedResponses = [...personalityResponses];
+    updatedResponses[questionNo - 1] = value; // questionNo is 1-based index, so use (questionNo - 1) for 0-based array index
+    setPersonalityResponses(updatedResponses);
+    console.log(personalityResponses)
+  };
+
+  const getSelectedValue = (questionNo) => {
+    const response = personalityResponses.find((response) => response.questionNo === questionNo);
+    return response ? response.value : undefined;
+  };
+  
+  
+
+
+  const handleYesClick = async () => {
+    try {
+      setClicked(true)
+      const userEmail = localStorage.getItem('emailForInterviewData')
+      const interviewName = localStorage.getItem('interviewName')
+      const formData = new FormData();
+      formData.append('personalityResponses', JSON.stringify(personalityResponses));
+      formData.append('email', userEmail || email);
+      formData.append('dob', dob);
+      formData.append('interviewName', interviewName);
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+      formData.append('gender', gender);
+      formData.append('twitterUrl', twitterUrl);
+      if (resumeFile) {
+        formData.append('resume', resumeFile);
+      }
+
+      const response = await fetch('http://localhost:8000/api/submitCandidateData', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        router.push('/candidate/round-two');
+      } else {
+        setClicked(false)
+        console.error('Failed to submit candidate data to the backend');
+      }
+    } catch (error) {
+      setClicked(false)
+      console.error('Error occurred while submitting candidate data to the backend:', error);
+    }
+  };
 
   const handleFormChange = (data) => {
     // Remove existing response with the same number (no)
@@ -51,7 +108,7 @@ export function RoundOneForm() {
 
       <div className="mx-auto max-w-3xl space-y-8" style={{marginTop: '70px'}}>
         <MyStepper activeStep={0}/>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <UserIcon className="h-6 w-6" />
@@ -60,25 +117,25 @@ export function RoundOneForm() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first-name">First name</Label>
-                <Input id="first-name" placeholder="Enter your first name" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
+                <Input id="first-name" onChange={(e) => setfirstName(e.target.value)} value={firstName} placeholder="Enter your first name" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last-name">Last name</Label>
-                <Input id="last-name" placeholder="Enter your last name" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
+                <Input id="last-name" onChange={(e) => setlastName(e.target.value)} value={lastName} placeholder="Enter your last name" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
               </div>
             </div>
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <MailIcon className="h-6 w-6" />
               <h2 className="text-lg font-bold">Email</h2>
             </div>
-            <Input id="email" placeholder="Enter your email" required type="email" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
+            <Input id="email" onChange={(e) => setEmail(e.target.value)} value={email} placeholder="Enter your email" required type="email" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }} />
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <UserIcon className="h-6 w-6" />
@@ -86,7 +143,7 @@ export function RoundOneForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="gender">Choose your gender</Label>
-              <select id="gender" className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }}>
+              <select id="gender" onChange={(e) => setGender(e.target.value)} value={gender} className="bg-white text-black placeholder-black border border-gray-300 rounded-md px-4 py-2 w-full" style={{ backgroundColor: 'white' }}>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="binary">Binary</option>
@@ -94,66 +151,79 @@ export function RoundOneForm() {
             </div>
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <CalendarIcon className="h-6 w-6" />
               <h2 className="text-lg font-bold">Date of Birth</h2>
             </div>
-            <Input id="dob" type="date" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
+            <Input id="dob" onChange={(e) => setDob(e.target.value)} value={dob} type="date" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <TwitterIcon className="h-6 w-6" />
               <h2 className="text-lg font-bold">Twitter Profile URL</h2>
             </div>
-            <Input id="twitter" placeholder="https://twitter.com/yourusername" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
+            <Input id="twitter" onChange={(e) => setTwitterUrl(e.target.value)} value={twitterUrl} placeholder="https://twitter.com/yourusername" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800 dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <FileIcon className="h-6 w-6" />
               <h2 className="text-lg font-bold">Upload Resume</h2>
             </div>
-            <Input accept=".pdf" id="resume" type="file" />
+            <Input onChange={(e) => setResumeFile(e.target.files[0])} accept=".jpg" id="resume" type="file" />
           </div>
         </div>
 
 
-
-
-
-        <Container
-          component="form"
-          sx={{
-            minWidth: '100%',
-            mx: '0rem',
-            textAlign: 'center',
-            padding: '4',
-            border: '1px solid #D1D5DB',
-            borderRadius: '0.375rem',
-          }}
-        >
+      <Card>
+        <CardHeader>
+          <CardTitle>Personality Test</CardTitle>
+          <CardDescription>Answer each question as accurately as possible.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {questions.map((question) => (
-            <QuestionCard
-              key={question.no}
-              question={question.text}
-              no={question.no}
-              onRadioClick={handleFormChange}
-            />
+            <div key={question.no} className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div className="font-semibold">{question.no}.</div>
+                <div>{question.text}</div>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-gray-500">Strongly Disagree</Label>
+                <div className="flex items-center space-x-9">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <React.Fragment key={`q${question.no}-${value}`}>
+                      <input
+                        id={`q${question.no}-${value}`}
+                        name={`q${question.no}`}
+                        type="radio"
+                        value={value}
+                        checked={personalityResponses[question.no - 1] === value}
+                        onChange={() => handlePersonalityResponseChange(question.no, value)}
+                        style={{
+                          height: `${getRadioSize(value)}vh`,
+                          width: `${getRadioSize(value)}vh`,
+                        }}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+                <Label className="text-xs text-gray-500">Strongly Agree</Label>
+              </div>
+            </div>
           ))}
-        </Container>
+        </CardContent>
+      </Card>
 
 
 
 
 
-
-
-        <div style={{ marginBottom: '100px' }}>
+      <div style={{ marginBottom: '100px' }}>
         <Button onClick={onOpen} className="w-full bg-black text-white hover:bg-gray-800">
           Next Round
         </Button>
@@ -176,13 +246,13 @@ export function RoundOneForm() {
           <Button className="hover:bg-gray-200 hover:text-gray-700 border border-gray-700 mr-2" onClick={onClose}>
               No
             </Button>
-            <Button className="bg-black text-white hover:bg-gray-800" onClick={handleYesClick}>
+            <Button className="bg-black text-white hover:bg-gray-800" onClick={handleYesClick} disabled={clicked}>
               Yes
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      </div>
+    </div>
     </>
   )
 }
@@ -294,6 +364,7 @@ function FileIcon(props) {
 }
 
 
+
 function StarIcon(props) {
   return (
     <svg
@@ -311,4 +382,14 @@ function StarIcon(props) {
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   )
+}
+
+function getRadioSize(value) {
+  if (value === 1 || value === 5) {
+    return 5; // Largest size for values 1 and 5
+  } else if (value === 2 || value === 4) {
+    return 3; // Medium size for values 2 and 4
+  } else {
+    return 2; // Smallest size for value 3
+  }
 }
