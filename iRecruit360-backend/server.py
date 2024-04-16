@@ -16,6 +16,7 @@ import uuid
 import json
 import random
 from confidence_analysis import process_video
+from round_three_analysis import check_answer_for_round_three
 
 json_file_path = 'keys.json'
 
@@ -803,12 +804,12 @@ def submit_answers():
         # Get data from the request body
         data = request.get_json()
         email = data.get('email')
-        interviewName = data.get('interviewName')
+        interview_name = data.get('interviewName')
         answers = data.get('answers')
         questions = data.get('questions')
 
-        thread = threading.Thread(target=process_pdf_and_extract_details,
-                                  args=(temp_pdf_path, interview_name, email, db, first_name, last_name))
+        thread = threading.Thread(target=check_answer_for_round_three,
+                                  args=(interview_name, email, db, questions, answers))
         thread.start()
 
         return jsonify({'message': 'Answers submitted successfully'}), 200
