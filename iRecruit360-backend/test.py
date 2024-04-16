@@ -7,7 +7,7 @@
 #     port = 587
 #     smtp_server = "smtp.gmail.com"
 #     userlogin = "teamirecruit360@gmail.com"
-#     password = "acxk tggb jjzt wwjf"
+#     password = ""
 #
 #     sender_email = "teamirecruit360@gmail.com"
 #     receiver_email = candidateEmail
@@ -116,3 +116,26 @@
 #
 #
 # send_email('basith', 'iambasith123@gmail.com', 'AWS', '145752', 'Friday')
+
+import google.generativeai as genai
+from pdf2image import convert_from_path, convert_from_bytes
+
+genai.configure(api_key='AIzaSyANmgwMZun3-dIqoXWTMo_p8nO5n5WQBbc')
+
+
+def process_pdf_and_extract_details(pdf_data):
+    try:
+
+
+        # Use GenerativeAI to extract details from the PDF page image
+        image_model = genai.GenerativeModel('gemini-pro-vision')
+        response = image_model.generate_content(["Extract relevant details from the resume", pdf_data])
+
+        extracted_text = response.text
+        print("Extracted Text:", extracted_text)
+
+            # Implement further processing or database updates based on the extracted text
+
+    except Exception as e:
+        print('Error processing PDF and extracting details:', e)
+

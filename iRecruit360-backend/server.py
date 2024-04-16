@@ -1,15 +1,31 @@
 from datetime import datetime
 import random
+import pandas as pd
+import PIL.Image
 from flask import Flask, request, jsonify, make_response
 from firebase_admin import credentials, firestore, initialize_app
 from flask_cors import CORS
 import smtplib
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+from pdf_extraction import process_pdf_and_extract_details
+from firebase_admin import credentials, firestore, storage
+import uuid
+import json
+import random
+from confidence_analysis import process_video
+
+json_file_path = 'keys.json'
+
+with open(json_file_path, 'r') as file:
+    keys_data = json.load(file)
+
+# Initialize Flask Uploads
 
 cred = credentials.Certificate('firestore_cred.json')
-app = initialize_app(cred)
+app = initialize_app(cred, options={'storageBucket': "irecruit360-e0e07.appspot.com"})
 db = firestore.client()
 existing_codes = set()
 
@@ -139,9 +155,9 @@ def rescheduleInterview():
 
 
 def send_email(candidateName, candidateEmail, interviewName, secretCode, dateAndTime, rescheduled):
-    smtp_server = "smtp.gmail.com"
-    userlogin = "teamirecruit360@gmail.com"
-    password = "acxk tggb jjzt wwjf"
+    smtp_server = keys_data['smtp_server']
+    userlogin = keys_data['userLogin']
+    password = keys_data['password']
 
     sender_email = "teamirecruit360@gmail.com"
     receiver_email = candidateEmail
@@ -448,9 +464,9 @@ def admin_login():
 
 # Helper function to send email
 def send_status_email(candidate_name, candidate_email, action):
-    smtp_server = "smtp.gmail.com"
-    userlogin = "teamirecruit360@gmail.com"
-    password = "acxk tggb jjzt wwjf"
+    smtp_server = keys_data['smtp_server']
+    userlogin = keys_data['userLogin']
+    password = keys_data['password']
 
     if action == 'accept':
         subject = f"Congratulations! Your application has been accepted"
@@ -545,6 +561,260 @@ def verify_interview_code():
             'success': False,
             'error': str(e)
         }), 500
+
+
+def calculate_big5_personality(personality_responses_str):
+    # Assuming personality_responses is a list of 50 responses
+    personality_responses = json.loads(personality_responses_str)
+    print(personality_responses)
+    if len(personality_responses) != 50:
+        return None  # Invalid response length
+
+    # Convert responses to a DataFrame for calculation
+    responses_df = pd.DataFrame({'response': personality_responses})
+
+    # Perform group summation based on specific column indices
+    extroversion = responses_df.iloc[0:10].mean()
+    neuroticism = responses_df.iloc[10:20].mean()
+    agreeableness = responses_df.iloc[20:30].mean()
+    conscientiousness = responses_df.iloc[30:40].mean()
+    openness = responses_df.iloc[40:50].mean()
+    print(extroversion, neuroticism, agreeableness, conscientiousness, openness)
+
+    return {
+        'extroversion': float(extroversion),
+        'neuroticism': float(neuroticism),
+        'agreeableness': float(agreeableness),
+        'conscientiousness': float(conscientiousness),
+        'openness': float(openness)
+    }
+
+
+@flask_app.route('/api/submitCandidateData', methods=['POST'])
+def submit_candidate_data():
+    try:
+        # Assuming the request contains form data
+        form_data = request.form
+        personality_responses = form_data.get('personalityResponses')
+        email = form_data.get('email')
+        first_name = form_data.get('firstName')
+        last_name = form_data.get('lastName')
+        dob = form_data.get('dob')
+        gender = form_data.get('gender')
+        twitter_url = form_data.get('twitterUrl')
+        resume_file = request.files['resume'] if 'resume' in request.files else None
+        interview_name = form_data.get('interviewName')  # Get interview name from frontend
+        print(type(personality_responses))
+
+        big5_personality = calculate_big5_personality(personality_responses)
+
+        if not big5_personality:
+            return jsonify({'error': 'Invalid personality responses length'}), 400
+
+        # Process the form data (e.g., print to console)
+        print('Received Form Data:')
+        print('first_name', first_name)
+        print('Email:', email)
+        print('Date of Birth:', dob)
+        print('Gender:', gender)
+        print('Twitter URL:', twitter_url)
+        if resume_file:
+            print('Resume File:', resume_file.filename)
+
+            # Generate a unique filename for the uploaded file
+            filename = f"{uuid.uuid4().hex}.jpg"
+            temp_pdf_path = f"./uploads/resumes/{filename}"
+            resume_file.save(temp_pdf_path)
+
+            print(temp_pdf_path)
+
+            # # Create a reference to the file in Firebase Storage
+            # storage_ref = storage.bucket().blob(f"pdfs/{filename}")
+            #
+            # # Upload the PDF file to Firebase Storage
+            # print(resume_file)
+            # storage_ref.upload_from_file(resume_file)
+
+            # Get the download URL of the uploaded PDF
+            # pdf_url = storage_ref.public_url
+            print(resume_file)
+            print('Outside Before Thread-----------')
+
+            # Use GenerativeAI to extract details from the PDF page image
+
+            thread = threading.Thread(target=process_pdf_and_extract_details,
+                                      args=(temp_pdf_path, interview_name, email, db, first_name, last_name))
+            thread.start()
+            print('Outside After Thread-----------')
+
+        # Get a reference to the Firestore collection 'hr'
+        hr_ref = db.collection('hr').where('company_name', '==', 'Edforma').get()[0].reference
+
+        # Query for the specific interview document by interview_name
+        interview_query = hr_ref.collection('created_interviews').where('interview_name', '==', interview_name).get()
+
+        if len(interview_query) == 0:
+            return jsonify({'error': 'Interview not found'}), 404
+
+        # Assuming we only take the first found interview for simplicity
+        interview_ref = interview_query[0].reference
+
+        # Query for the candidate document within the interview based on email
+        candidate_query = interview_ref.collection('candidates').where('email', '==', email).get()
+
+        if len(candidate_query) == 0:
+            return jsonify({'error': 'Candidate not found in the specified interview'}), 404
+
+        # Assuming we only take the first found candidate for simplicity
+        candidate_ref = candidate_query[0].reference
+
+        # Assuming 'round_one' is a nested dictionary within the candidate document
+        round_one_data = {
+            'submitted': True,
+            'personality_responses': personality_responses,
+            'email': email,
+            'dob': dob,
+            'gender': gender,
+            'twitter_url': twitter_url,
+            'big5_personality_analysis': big5_personality,
+        }
+
+        # Update the candidate document with the 'round_one' data
+        candidate_ref.update({
+            'name': f'{first_name} {last_name}',  # Assuming 'firstName' and 'lastName' are provided
+            'round_one': round_one_data,
+            'started_interview': True,
+        })
+
+        return jsonify({'message': 'Form data received and candidate updated successfully'}), 200
+
+    except Exception as e:
+        print('Error processing form data:', e)
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+
+@flask_app.route('/api/submitVideo', methods=['POST'])
+def submit_video():
+    try:
+        if 'video' not in request.files:
+            return jsonify({'error': 'No video file provided'}), 400
+
+        video_file = request.files['video']
+
+        if video_file.filename == '':
+            return jsonify({'error': 'No selected video file'}), 400
+
+        if video_file:
+            # Generate a unique filename for the video file
+            filename = f"{uuid.uuid4().hex}.webm"
+            temp_video_path = f"./uploads/videos/{filename}"
+            video_file.save(temp_video_path)
+
+            # Prepare data to pass to the thread function
+            interview_name = request.form.get('interviewName')
+            email = request.form.get('email')
+            question = request.form.get('question')
+
+            # Start a new thread to process the video asynchronously
+            thread = threading.Thread(target=process_video,
+                                      args=(temp_video_path, interview_name, email, db, question))
+            thread.start()
+
+            return jsonify({'message': 'Video submitted successfully'}), 200
+
+    except Exception as e:
+        print('Error submitting video:', e)
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+
+@flask_app.route('/api/getQuestion', methods=['POST'])
+def get_question():
+    try:
+
+        data = request.json
+        interview_name = data.get('interviewName')
+
+        hr_ref = db.collection('hr').where('company_name', '==', 'Edforma').get()[0].reference
+        interview_query = hr_ref.collection('created_interviews').where('interview_name', '==', interview_name).get()
+
+        if not interview_query:
+            return jsonify({'error': 'Interview not found'}), 404
+
+        # Extract questions from the interview document
+        interview_document = interview_query[0]
+        round_two_questions = interview_document.get('round_two_questions')
+
+        # Split questions string into a list (assuming questions are separated by commas)
+        questions_list = [question.strip() for question in round_two_questions.split(',')]
+
+        # Select a random question (or handle question selection logic as needed)
+        selected_question = questions_list[random.randint(0, len(questions_list) - 1)]
+
+        return jsonify({'question': selected_question}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/getQuestions', methods=['POST'])
+def get_questions():
+    try:
+        print('here')
+        request_data = request.json
+        interview_name = request_data.get('interviewName')
+        print(interview_name)
+        email = request_data.get('email')
+
+        # Assuming Firestore collection paths and structure
+        hr_ref = db.collection('hr').where('company_name', '==', 'Edforma').get()[0].reference
+        interview_query = hr_ref.collection('created_interviews').where('interview_name', '==', interview_name).get()
+
+        if len(interview_query) == 0:
+            return jsonify({'error': 'Interview not found'}), 404
+
+        # Get the interview reference
+        interview_ref = interview_query[0].reference
+
+        # Query candidate by email
+        candidate_query = interview_ref.collection('candidates').where('email', '==', email).get()
+        print(candidate_query)
+
+        if len(candidate_query) == 0:
+            return jsonify({'error': 'Candidate not found'}), 404
+
+        # Assuming we only take the first found candidate for simplicity
+        candidate_doc = candidate_query[0]
+        candidate_data = candidate_doc.to_dict().get('round_three', {})
+
+        # Print all the contents of candidate_doc
+        print(candidate_data['questions'])
+        questions_list = json.loads(candidate_data['questions'])
+        print(questions_list)
+
+        return jsonify({'questions': questions_list}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/roundThreeSubmitAnswers', methods=['POST'])
+def submit_answers():
+    try:
+        # Get data from the request body
+        data = request.get_json()
+        email = data.get('email')
+        interviewName = data.get('interviewName')
+        answers = data.get('answers')
+        questions = data.get('questions')
+
+        thread = threading.Thread(target=process_pdf_and_extract_details,
+                                  args=(temp_pdf_path, interview_name, email, db, first_name, last_name))
+        thread.start()
+
+        return jsonify({'message': 'Answers submitted successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':
