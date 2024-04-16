@@ -1,15 +1,32 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef,  useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import Header from './header';
+import { useRouter } from 'next/navigation';
 import MyStepper from './stepper';
+import { useDisclosure } from '@chakra-ui/react';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  AlertDialogCloseButton
+} from '@chakra-ui/react';
 
 const InterviewComponent = () => {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+  const [clicked, setClicked] = useState(false);
+
+  const router = useRouter();
+
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -46,6 +63,7 @@ const InterviewComponent = () => {
   }, []);
 
   const handleFinalSubmit = async () => {
+    setClicked(true)
     try {
       const formData = {
         questions: questions.map((question) => question.text),
@@ -70,13 +88,17 @@ const InterviewComponent = () => {
         if (response.ok) {
           console.log('Answers submitted successfully');
           setAnswers({});
+          router.push('/candidate/finishInterview')
         } else {
+          setClicked(true)
           console.error('Failed to submit answers');
         }
       } else {
+        setClicked(true)
         console.log('Please answer all questions before submitting.');
       }
     } catch (error) {
+      setClicked(true)
       console.error('Error submitting answers:', error);
     }
   };
@@ -125,7 +147,7 @@ const InterviewComponent = () => {
               <CardFooter className="w-full flex justify-center">
                 <Button
                   className={`bg-orange-700 w-full hover:bg-orange-500 ${questions.length === 0 ? 'hidden' : ''}`}
-                  onClick={handleFinalSubmit}
+                  onClick={onOpen}
                   disabled={questions.length === 0 || !allQuestionsAnswered}
                 >
                   Submit
@@ -134,6 +156,31 @@ const InterviewComponent = () => {
             </CardContent>
           </Card>
         )}
+
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+          <AlertDialogContent>
+            <AlertDialogHeader>Proceed to Next Round?</AlertDialogHeader>
+            <AlertDialogCloseButton />
+            <AlertDialogBody>
+            Are you certain you wish to submit your answers and conclude the test?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+            <Button className="hover:bg-gray-200 hover:text-gray-700 border border-gray-700 mr-2" onClick={onClose}>
+                No
+              </Button>
+              <Button className="bg-black text-white hover:bg-gray-800" onClick={handleFinalSubmit} disabled={clicked}>
+                Yes
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </>
   );

@@ -1,14 +1,13 @@
-"use client"
-
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
-
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+    imageUrl?: string; // Add imageUrl prop
+  }
+>(({ className, imageUrl, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
@@ -16,7 +15,13 @@ const Avatar = React.forwardRef<
       className
     )}
     {...props}
-  />
+  >
+    {imageUrl ? (
+      <AvatarImage src={imageUrl} alt="Avatar" />
+    ) : (
+      <AvatarFallback>Initials</AvatarFallback>
+    )}
+  </AvatarPrimitive.Root>
 ))
 Avatar.displayName = AvatarPrimitive.Root.displayName
 

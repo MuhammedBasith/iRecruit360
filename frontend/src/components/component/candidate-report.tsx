@@ -1,34 +1,63 @@
-import { CardTitle, CardDescription, CardHeader, CardContent, Card } from "@/components/ui/card"
+'use client'
+
+import React, { useState, useRef,  useEffect } from 'react';
+import { CardTitle, CardDescription, CardHeader, CardContent, Card, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/ui/avatar"
 import { ResponsiveBar } from "@nivo/bar"
 import { Textarea } from "@/components/ui/textarea"
 
 export default function CandidateReport() {
+
+  // const [name, setName] = useState('')
+  const name = localStorage.getItem('CandidateNameForReport')
+  const email = localStorage.getItem('CandidateEmailForReport')
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const storedEmail = localStorage.getItem('emailForInterviewData');
+        const storedInterviewName = localStorage.getItem('interviewName');
+
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: storedEmail,
+            interviewName: storedInterviewName
+          })
+        };
+
+        const response = await fetch('http://localhost:8000/api/getDataForReport', requestOptions);
+        if (response.ok) {
+          const data = await response.json();
+          const questionsWithIds = data.questions
+          setQuestions(questionsWithIds);
+        } else {
+          console.error('Failed to fetch questions');
+        }
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
   return (
     <div className="flex justify-center items-center py-7 ">
       <Card className="w-full max-w-6xl">
-        <CardHeader className="flex flex-row items-start gap-4 p-8">
+        <CardHeader className="flex flex-row items-start gap-4 p-8 mt-5">
           <div className="grid gap-1.5">
             <CardTitle>Individual Candidate Scorecard</CardTitle>
-            <CardDescription>Detailed breakdown of Venika Murthy's assessment results</CardDescription>
+            <CardDescription>Detailed breakdown of {name}’s assessment results</CardDescription>
           </div>
           <div className="flex flex-col ml-auto shrink-0 items-end">
             <div className="flex flex-row items-center gap-2">
-              <Button className="w-8 h-8" size="icon" variant="outline">
-                <PrinterIcon className="h-4 w-4" />
-                <span className="sr-only">Print</span>
-              </Button>
-              <Button className="w-8 h-8" size="icon" variant="outline">
-                <DownloadIcon className="h-4 w-4" />
-                <span className="sr-only">Download</span>
-              </Button>
-            </div>
-            <div className="flex flex-row items-center gap-2 mt-2">
-              <Avatar className="border w-10 h-10" />
+              <Avatar className="border w-10 h-10" imageUrl='https://static.vecteezy.com/system/resources/previews/025/638/560/non_2x/simple-avatar-icon-the-icon-can-be-used-for-websites-print-templates-presentation-templates-illustrations-etc-free-vector.jpg'/>
               <div className="flex flex-col ml-2 leading-none">
-                <div className="font-semibold">Venika Murthy</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">UI/UX Designer</div>
+                <div className="font-semibold">{name}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{email}</div>
               </div>
             </div>
           </div>
@@ -39,7 +68,7 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Personality Analysis</CardTitle>
                 <CardDescription>
-                  Analysis of Venika Murthy's personality based on social media data from LinkedIn and Twitter.
+                  Analysis of {name}’s personality based on social media data from LinkedIn and Twitter.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
@@ -281,6 +310,22 @@ export default function CandidateReport() {
             </Card>
           </section>
         </CardContent>
+        <CardFooter className="flex justify-between items-center p-4">
+  <div className="flex items-center w-full">
+    <Button className="flex-1 transition-colors duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-800 mr-2" variant="outline">
+      <PrinterIcon className="h-4 w-4 mr-2" />
+      Print
+    </Button>
+
+    <Button className="flex-1 transition-colors duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-800 ml-2" variant="outline">
+      <DownloadIcon className="h-4 w-4 mr-2" />
+      Download
+    </Button>
+  </div>
+</CardFooter>
+
+
+
       </Card>
     </div>
   )
