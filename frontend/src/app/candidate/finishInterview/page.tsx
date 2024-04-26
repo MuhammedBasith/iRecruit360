@@ -1,10 +1,11 @@
 import Confetti from '@/components/component/Confetti'
+import InterviewFinished from '@/components/component/interview-finished'
 
 
 export default function Page(){
     return(
         <>
-            <h1 className="flex items-center justify-center mt-44 text-5xl">You rock!!</h1>
+            <InterviewFinished />
             <Confetti />
         </>
     )

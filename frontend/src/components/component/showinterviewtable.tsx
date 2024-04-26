@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 
 export default function ShowInterviewTable() {
   const [interviews, setInterviews] = useState([]); // State variable to store interview data
+  const [firstButtonClicked, setFirstButtonClicked] = useState(false)
+  const [secondButtonClicked, setSecondButtonClicked] = useState(false)
   const router = useRouter();
 
   useEffect(() => {
@@ -54,8 +56,14 @@ export default function ShowInterviewTable() {
                   <div className="font-semibold">{interview}</div>
                 </div>
                 <div className="flex items-center justify-end space-x-2">
-                  <Button size="sm" className="bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" onClick={() => handleReschedule(interview)}>Reschedule</Button>
-                  <Button size="sm" className="bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" onClick={() => handleViewResults(interview)}>View Results</Button>
+                  <Button size="sm" className="bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" disabled={firstButtonClicked} onClick={() =>{
+                    setFirstButtonClicked(true)
+                    handleReschedule(interview)
+                    }}>
+                      Reschedule</Button>
+                  <Button size="sm" className="bg-gray-800 text-white hover:bg-gray-700 transition duration-300 ease-in-out" disabled={secondButtonClicked} onClick={() => {
+                    setSecondButtonClicked(true)
+                    handleViewResults(interview)}}>View Results</Button>
                 </div>
               </div>
             </div>

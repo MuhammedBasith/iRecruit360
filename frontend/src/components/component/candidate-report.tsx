@@ -10,39 +10,52 @@ import { Textarea } from "@/components/ui/textarea"
 export default function CandidateReport() {
 
   // const [name, setName] = useState('')
+  const [roundOneData, setRoundOneData] = useState({});
+  const [roundTwoData, setRoundTwoData] = useState({});
+  const [roundThreeData, setRoundThreeData] = useState({});
   const name = localStorage.getItem('CandidateNameForReport')
   const email = localStorage.getItem('CandidateEmailForReport')
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const storedEmail = localStorage.getItem('emailForInterviewData');
-        const storedInterviewName = localStorage.getItem('interviewName');
 
-        const requestOptions = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: storedEmail,
-            interviewName: storedInterviewName
-          })
-        };
+  const fetchCandidateData  = async () => {
+    try {
+      const storedEmail = localStorage.getItem('CandidateEmailForReport');
+      console.log(storedEmail)
+      const storedInterviewName = localStorage.getItem('interviewName');
 
-        const response = await fetch('http://localhost:8000/api/getDataForReport', requestOptions);
-        if (response.ok) {
-          const data = await response.json();
-          const questionsWithIds = data.questions
-          setQuestions(questionsWithIds);
-        } else {
-          console.error('Failed to fetch questions');
-        }
-      } catch (error) {
-        console.error('Error fetching questions:', error);
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: storedEmail,
+          interviewName: storedInterviewName
+        })
+      };
+
+      const response = await fetch('http://localhost:8000/api/getDataForReport', requestOptions);
+      if (response.ok) {
+        const data = await response.json();
+        const roundOneData = data.candidateDataRoundOne;
+        const roundTwoData = data.candidateDataRoundTwo;
+        const roundThreeData = data.candidateDataRoundThree;
+
+        setRoundOneData(data.candidateDataRoundOne);
+        setRoundTwoData(data.candidateDataRoundTwo);
+        setRoundThreeData(data.candidateDataRoundThree);
+
+        // Set state or perform other operations with the received data
+    } else {
+        console.error('Failed to fetch candidate data');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+    }
+  };
 
-    fetchQuestions();
-  }, []);
+  useEffect(() => {
+    fetchCandidateData ();
+}, []);
+
 
   return (
     <div className="flex justify-center items-center py-7 ">
