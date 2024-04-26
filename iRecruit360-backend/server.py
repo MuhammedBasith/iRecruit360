@@ -157,7 +157,7 @@ def rescheduleInterview():
 
 def send_email(candidateName, candidateEmail, interviewName, secretCode, dateAndTime, rescheduled):
     smtp_server = keys_data['smtp_server']
-    userlogin = keys_data['userLogin']
+    userlogin = keys_data['userlogin']
     password = keys_data['password']
 
     sender_email = "teamirecruit360@gmail.com"
@@ -466,7 +466,7 @@ def admin_login():
 # Helper function to send email
 def send_status_email(candidate_name, candidate_email, action):
     smtp_server = keys_data['smtp_server']
-    userlogin = keys_data['userLogin']
+    userlogin = keys_data['userlogin']
     password = keys_data['password']
 
     if action == 'accept':
@@ -644,7 +644,8 @@ def submit_candidate_data():
             # Use GenerativeAI to extract details from the PDF page image
 
             thread = threading.Thread(target=process_pdf_and_extract_details,
-                                      args=(temp_pdf_path, interview_name, email, db, first_name, last_name))
+                                      args=(temp_pdf_path, interview_name, email, db, first_name, last_name,
+                                            big5_personality))
             thread.start()
             print('Outside After Thread-----------')
 
@@ -663,8 +664,19 @@ def submit_candidate_data():
         # Query for the candidate document within the interview based on email
         candidate_query = interview_ref.collection('candidates').where('email', '==', email).get()
 
+        found = True
+        count = 0
+
         if len(candidate_query) == 0:
-            return jsonify({'error': 'Candidate not found in the specified interview'}), 404
+            while found:
+                count += 1
+                interview_ref = interview_query[count].reference
+                if len(candidate_query) != 0:
+                    candidate_query = interview_ref.collection('candidates').where('email', '==', email).get()
+                    found = False
+
+                elif count == 5:
+                    return jsonify({'error': 'Candidate not found in the specified interview'}), 404
 
         # Assuming we only take the first found candidate for simplicity
         candidate_ref = candidate_query[0].reference
@@ -813,6 +825,49 @@ def submit_answers():
         thread.start()
 
         return jsonify({'message': 'Answers submitted successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@flask_app.route('/api/getDataForReport', methods=['POST'])
+def get_data():
+    try:
+        request_data = request.json
+        interview_name = request_data.get('interviewName')
+        print(interview_name)
+        email = request_data.get('email')
+
+        # Assuming Firestore collection paths and structure
+        hr_ref = db.collection('hr').where('company_name', '==', 'Edforma').get()[0].reference
+        interview_query = hr_ref.collection('created_interviews').where('interview_name', '==', interview_name).get()
+
+        if len(interview_query) == 0:
+            return jsonify({'error': 'Interview not found'}), 404
+
+        # Get the interview reference
+        interview_ref = interview_query[0].reference
+
+        # Query candidate by email
+        candidate_query = interview_ref.collection('candidates').where('email', '==', email).get()
+        print(candidate_query)
+
+        if len(candidate_query) == 0:
+            return jsonify({'error': 'Candidate not found'}), 404
+
+        # Assuming we only take the first found candidate for simplicity
+        candidate_doc = candidate_query[0]
+        candidate_data_round_one = candidate_doc.to_dict().get('round_one', {})
+        candidate_data_round_two = candidate_doc.to_dict().get('round_two', {})
+        candidate_data_round_three = candidate_doc.to_dict().get('round_three', {})
+
+        response_data = {
+            'candidateDataRoundOne': candidate_data_round_one,
+            'candidateDataRoundTwo': candidate_data_round_two,
+            'candidateDataRoundThree': candidate_data_round_three,
+        }
+
+        return jsonify(response_data), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

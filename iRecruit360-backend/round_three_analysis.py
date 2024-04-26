@@ -25,6 +25,7 @@ def check_answer_for_round_three(interview_name, email, db, questions, answers):
     q_a = {}
     final_result = {}
     for i in range(len(questions)):
+        print(q_a)
         q_a[questions[i]] = answers[str(i+1)]
         prompt = 'Question by interviewer -> ' + questions[i] + ' Answer by candidate ->' + answers[str(i+1)] + '.....' + 'Imagine that you are a professional interviwer and an expert in programming, provide a fair and concise feedback about this candidate with respect to the answer that is given by them.'
         print(prompt)

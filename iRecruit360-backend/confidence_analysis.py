@@ -39,7 +39,9 @@ def process_video(temp_video_path, interview_name, email, db, question):
         # Optionally handle response from Whisper API
         if response.ok:
             print("Whisper API request successful")
+            print(type(response))
             print(response.text)
+            print(response.json()['text'])
         else:
             print("Whisper API request failed")
 
@@ -78,7 +80,7 @@ def process_video(temp_video_path, interview_name, email, db, question):
         updated_round_two = {
             **current_round_two,
             'submitted': True,
-            'transcription': response.text.text,
+            'transcription': response.json()['text'],
             'question': question,
             'confidenceResult': confidence_result
         }

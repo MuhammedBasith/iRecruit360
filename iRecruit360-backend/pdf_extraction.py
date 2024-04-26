@@ -18,7 +18,7 @@ genai.configure(api_key=genai_api)
 humeAPI = keys_data['humeAPI']
 
 
-def process_pdf_and_extract_details(pdf_data, interview_name, email, db, first_name, last_name):
+def process_pdf_and_extract_details(pdf_data, interview_name, email, db, first_name, last_name, big5_personality):
     try:
         # time.sleep(20)
         img = PIL.Image.open(pdf_data)
@@ -29,10 +29,16 @@ def process_pdf_and_extract_details(pdf_data, interview_name, email, db, first_n
 
         extracted_text = response.text
         print("Extracted Text:", extracted_text)
-        question_response = text_model.generate_content(f'Give me three questions inside an array as two different array elements seperated by commas, you can make the questions from any of these topics {extracted_text}')
+        question_response = text_model.generate_content(f'Give me two questions inside an python list as two different elements seperated by commas, you can make the questions from any of these topics {extracted_text}')
 
         print(question_response)
         generated_questions = question_response.text
+
+        desc_about_big_five = text_model.generate_content(f'{str(big5_personality)}....Heres the score of the big personality analysis of self rated questionnaire by the candidate, give insights about the candidate based on the data that could be helpful for an HR, the candidate name is {first_name} {last_name}')
+        big_five_insights = desc_about_big_five.text
+
+        recommendations = text_model.generate_content(f'{str(big5_personality)}...Heres the score of the big personality analysis of self rated questionnaire by the candidate, give job recommendations etc based on the data that could be helpful for an HR, the candidate name is {first_name} {last_name}')
+        big_five_recommendations = recommendations.text
 
         hr_ref = db.collection('hr').where('company_name', '==', 'Edforma').get()[0].reference
 
@@ -64,7 +70,9 @@ def process_pdf_and_extract_details(pdf_data, interview_name, email, db, first_n
         # Merge current 'round_one' data with new 'resume_skills'
         updated_round_one = {
             **current_round_one,
-            'resume_skills': extracted_text  # Add new resume skills
+            'resume_skills': extracted_text,
+            'big_five_insights': big_five_insights,
+            'big_five_recommendations': big_five_recommendations,
         }
         updated_round_three = {
             **current_round_three,
