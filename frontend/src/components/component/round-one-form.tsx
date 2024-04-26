@@ -71,7 +71,7 @@ export function RoundOneForm() {
       formData.append('firstName', firstName);
       formData.append('lastName', lastName);
       formData.append('gender', gender);
-      formData.append('twitterUrl', twitterUrl);
+      formData.append('twitterUrl', 'test');
       if (resumeFile) {
         formData.append('resume', resumeFile);
       }
@@ -160,7 +160,7 @@ export function RoundOneForm() {
             <Input id="dob" onChange={(e) => setDob(e.target.value)} value={dob} type="date" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
           </div>
         </div>
-        <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
+        {/* <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
               <TwitterIcon className="h-6 w-6" />
@@ -168,7 +168,7 @@ export function RoundOneForm() {
             </div>
             <Input id="twitter" onChange={(e) => setTwitterUrl(e.target.value)} value={twitterUrl} placeholder="https://twitter.com/yourusername" style={{ backgroundColor: 'white', borderColor: '#D1D5DB' }}/>
           </div>
-        </div>
+        </div> */}
         <div className="p-4 border border-gray-200 rounded-lg dark:border-gray-800" style={{borderColor: '#D1D5DB'}}>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">

@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import React, { useState, useRef,  useEffect } from 'react';
@@ -10,9 +11,9 @@ import { Textarea } from "@/components/ui/textarea"
 export default function CandidateReport() {
 
   // const [name, setName] = useState('')
-  const [roundOneData, setRoundOneData] = useState({});
-  const [roundTwoData, setRoundTwoData] = useState({});
-  const [roundThreeData, setRoundThreeData] = useState({});
+  const [roundOneData, setRoundOneData] = useState({"big5_personality_analysis": {"agreeableness":0, "conscientiousness": 0, "extroversion": 0, "neuroticism": 0, "openness": 0}, "big_five_insights": "Loading...", "big_five_recommendations": "Loading..."});
+  const [roundTwoData, setRoundTwoData] = useState({"confidenceResult": "Loading...", "transcription": "Loading...", "question": "Loading..."});
+  const [roundThreeData, setRoundThreeData] = useState({"q_a": {}, "answers": "Loading...", "evaluation": {}});
   const name = localStorage.getItem('CandidateNameForReport')
   const email = localStorage.getItem('CandidateEmailForReport')
 
@@ -42,6 +43,9 @@ export default function CandidateReport() {
         setRoundOneData(data.candidateDataRoundOne);
         setRoundTwoData(data.candidateDataRoundTwo);
         setRoundThreeData(data.candidateDataRoundThree);
+        console.log(data.candidateDataRoundOne)
+        console.log(data.candidateDataRoundTwo)
+        console.log(data.candidateDataRoundThree)
 
         // Set state or perform other operations with the received data
     } else {
@@ -55,6 +59,10 @@ export default function CandidateReport() {
   useEffect(() => {
     fetchCandidateData ();
 }, []);
+
+if (!roundOneData || !roundTwoData || !roundThreeData) {
+  return <div>Loading...</div>; // Placeholder for loading state
+}
 
 
   return (
@@ -81,42 +89,36 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Personality Analysis</CardTitle>
                 <CardDescription>
-                  Analysis of {name}’s personality based on social media data from LinkedIn and Twitter.
+                  Analysis of {name}’s personality based on the Self Rating Questionnaire Results.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <div className="flex flex-row items-start gap-4">
-                  <div className="grid gap-1.5">
-                    <CardTitle>Personality Traits</CardTitle>
-                    <CardDescription>
-                      The following personality traits have been identified based on the analysis of social media data.
-                    </CardDescription>
-                  </div>
+                <div className="flex flex-row items-start gap-4 mb-10 mt-10">
                   <div className="grid gap-2">
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
                       <div className="font-semibold">Openness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: 4.2)</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.openness})</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
                       <div className="font-semibold">Conscientiousness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: 3.8)</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.conscientiousness})</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingDownIcon className="h-4 w-4" />
                       <div className="font-semibold">Extraversion</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: 2.1)</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.extroversion})</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingDownIcon className="h-4 w-4" />
                       <div className="font-semibold">Agreeableness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: 2.5)</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.agreeableness})</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
-                      <div className="font-semibold">Emotional Stability</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: 4.0)</div>
+                      <div className="font-semibold">Neuroticism</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.neuroticism})</div>
                     </div>
                   </div>
                 </div>
@@ -124,52 +126,14 @@ export default function CandidateReport() {
                   <div className="grid gap-2">
                     <div className="font-semibold">Insights</div>
                     <div>
-                      Venika Murthy demonstrates a high level of openness, indicating a willingness to embrace new ideas
-                      and experiences. However, her scores for extraversion and agreeableness are relatively lower,
-                      suggesting a more introverted and independent nature. Her emotional stability score is quite
-                      positive, indicating a balanced and stable emotional state.
+                    {roundOneData.big_five_insights}
                     </div>
                   </div>
                   <div className="grid gap-2">
                     <div className="font-semibold">Recommendations</div>
                     <div>
-                      Based on the analysis, it is recommended to provide Venika with opportunities to work independently
-                      and exercise her creativity. Additionally, team-based activities that allow her to collaborate with
-                      others in a structured and supportive environment may help her develop stronger interpersonal
-                      skills.
+                    {roundOneData.big_five_recommendations}
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-          <section>
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>Self-rating Questionnaire Results</CardTitle>
-                <CardDescription>
-                  Results of the self-rating questionnaire based on the Big Five personality traits model.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                  <div className="font-semibold">Insights</div>
-                  <div>
-                    Venika's self-rating questionnaire results align closely with the analysis of her social media data.
-                    She has rated herself higher in openness and emotional stability, which is consistent with the
-                    insights derived from the personality analysis. Her self-perception of conscientiousness also matches
-                    the analysis, indicating that she values organization, planning, and goal-setting in her personal and
-                    professional life.
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <div className="font-semibold">Recommendations</div>
-                  <div>
-                    Given that Venika's self-assessment aligns with the questionnaire results, it is important to
-                    acknowledge her awareness of her personality traits. HR and team leaders can leverage this
-                    self-awareness to create personalized development plans that capitalize on her strengths and address
-                    areas where she seeks improvement. Providing opportunities for self-directed learning, mentorship, and
-                    feedback can further enhance her professional growth and confidence.
                   </div>
                 </div>
               </CardContent>
@@ -180,31 +144,27 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Video Analysis</CardTitle>
                 <CardDescription>
-                  Analysis of Venika Murthy's video, including metrics such as confidence level, stress level, tone of
+                  Analysis of {name}’s video, including metrics such as confidence level, stress level, tone of
                   speech, rate of speech, and filler word usage.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
                 <div className="grid gap-2">
-                  <div className="font-semibold">Insights</div>
+                  <div className="font-semibold">Question Asked</div>
                   <div>
-                    The video analysis reveals that Venika demonstrates a high level of confidence and articulation in her
-                    speech. Her tone is generally positive and engaging, which can contribute to effective communication
-                    with colleagues, clients, or team members. While she appears composed and self-assured, there are
-                    instances where she exhibits signs of mild stress or nervousness, especially when addressing
-                    challenging topics or responding to unexpected questions. Her use of filler words is minimal,
-                    indicating that she maintains clarity and coherence in her speech.
+                  {roundTwoData.question}
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <div className="font-semibold">Recommendations</div>
+                  <div className="font-semibold">Video Transcription</div>
                   <div>
-                    Based on the video analysis, it is evident that Venika possesses strong communication skills and
-                    presents herself professionally. To further enhance her video presentation skills, she may benefit
-                    from targeted training or coaching sessions that focus on refining her body language, using visual
-                    aids effectively, and structuring her messages with precision. Encouraging her to participate in mock
-                    presentations, public speaking opportunities, or virtual meetings can help her gain more confidence
-                    and poise in diverse communication scenarios.
+                  {roundTwoData.transcription}
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <div className="font-semibold">Insights</div>
+                  <div>
+                  {roundTwoData.confidenceResult}
                   </div>
                 </div>
               </CardContent>
@@ -215,39 +175,44 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Interview Bot Scores</CardTitle>
                 <CardDescription>
-                  Venika Murthy's scores based on key skills assessed by the Interview Bot.
+                {name}’s scores based on key skills assessed by the Interview Bot.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <CardTitle>Overall Performance</CardTitle>
-                  <CardDescription>
-                    The Interview Bot has evaluated Venika's performance across various competencies, providing an
-                    automated assessment of her interview readiness and skills. The scores reflect her proficiency in
-                    communication, problem-solving, teamwork, adaptability, and other attributes that are crucial for
-                    success in the workplace.
+                  <CardTitle>Question asked and the corresponding answer given by {name}.</CardTitle>
+                  <CardDescription className='mt-3'>
+                  {roundThreeData.q_a && (
+                  <div className="grid gap-4">
+                    {Object.entries(roundThreeData.q_a).map(([question, answer], index) => (
+                      <div key={index}>
+                        <div className="font-semibold">Question: {question}</div>
+                        <div className="font-semibold">Answer: {answer}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!roundThreeData.q_a && <div>No questions and answers available.</div>}
+
                   </CardDescription>
                 </div>
                 <div className="grid gap-4">
-                  <div className="font-semibold">Insights</div>
+                  <div className="font-semibold">Evaluation</div>
                   <div>
-                    The Interview Bot scores indicate that Venika has demonstrated strengths in areas such as critical
-                    thinking, customer interaction, and attention to detail. Her responses to situational questions and
-                    behavioral scenarios have been well-reasoned and showcase her ability to effectively handle challenges
-                    and make sound decisions. The scores also highlight her positive attitude and professionalism during
-                    the virtual interview process, contributing to a favorable impression on the interviewer.
+
+                  {roundThreeData.evaluation && (
+                  <div className="grid gap-4">
+                    {Object.entries(roundThreeData.evaluation).map(([question, feedback], index) => (
+                      <div key={index}>
+                        <div className="font-semibold">Question: {question}</div>
+                        <div className="font-semibold">Feedback:</div>
+                        <div>{feedback}</div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="grid gap-2">
-                  <div className="font-semibold">Recommendations</div>
-                  <div>
-                    Based on the Interview Bot assessment, it is evident that Venika possesses the competencies required
-                    for the role and has performed credibly in the virtual interview. HR and hiring managers can use these
-                    insights to validate her skills and cultural fit within the organization. To further support Venika's
-                    onboarding and integration, it is recommended to provide her with a personalized orientation program
-                    that familiarizes her with the company's policies, values, and team dynamics. Additionally, assigning
-                    her a mentor or buddy who can guide her through the initial days and help her navigate the
-                    organizational landscape can enhance her sense of belonging and engagement.
+                )}
+                {!roundThreeData.evaluation && <div>No evaluations available.</div>}
+
                   </div>
                 </div>
               </CardContent>
@@ -267,7 +232,7 @@ export default function CandidateReport() {
                   <CardHeader>
                     <CardTitle>Personality Radar</CardTitle>
                     <CardDescription>
-                      A radar chart depicting Venika Murthy's personality traits based on the assessment.
+                      A radar chart depicting {name}’s personality traits based on the assessment.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center">
@@ -278,7 +243,7 @@ export default function CandidateReport() {
                   <CardHeader>
                     <CardTitle>Emotional Analysis</CardTitle>
                     <CardDescription>
-                      An emotional heatmap showing the distribution of emotions in Venika Murthy's video.
+                      An emotional heatmap showing the distribution of emotions in {name}’s video.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center">
@@ -299,7 +264,7 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Parsed Resume</CardTitle>
                 <CardDescription>
-                  View the parsed resume for additional information about Venika Murthy's qualifications and experience.
+                  View the parsed resume for additional information about {name}’s qualifications and experience.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
@@ -314,7 +279,7 @@ export default function CandidateReport() {
               <CardHeader>
                 <CardTitle>Notes Section</CardTitle>
                 <CardDescription>
-                  Add comments or observations regarding Venika Murthy's assessment results.
+                  Add comments or observations regarding {name}’s assessment results.
                 </CardDescription>
               </CardHeader>
               <CardContent>
