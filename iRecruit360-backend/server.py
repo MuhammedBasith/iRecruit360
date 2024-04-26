@@ -801,10 +801,12 @@ def get_questions():
 
         # Print all the contents of candidate_doc
         print(candidate_data['questions'])
-        questions_list = json.loads(candidate_data['questions'])
-        print(questions_list)
+        print(candidate_data)
+        # questions_list = json.loads(candidate_data)
+        my_list = eval(candidate_data['questions'])
+        print(my_list)
 
-        return jsonify({'questions': questions_list}), 200
+        return jsonify({'questions': my_list}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
