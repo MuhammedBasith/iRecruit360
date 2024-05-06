@@ -7,12 +7,65 @@ import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/ui/avatar"
 import { ResponsiveBar } from "@nivo/bar"
 import { Textarea } from "@/components/ui/textarea"
+import Plot from 'react-plotly.js';
+
 
 export default function CandidateReport() {
 
   // const [name, setName] = useState('')
+  const scores_dict = {
+    'Admiration': 0,
+    'Adoration': 0,
+    'Aesthetic Appreciation': 0,
+    'Amusement': 0,
+    'Anger': 0,
+    'Anxiety': 0,
+    'Awe': 0,
+    'Awkwardness': 0,
+    'Boredom': 0,
+    'Calmness': 0,
+    'Concentration': 0,
+    'Confusion': 0,
+    'Contemplation': 0,
+    'Contempt': 0,
+    'Contentment': 0,
+    'Craving': 0,
+    'Desire': 0,
+    'Determination': 0,
+    'Disappointment': 0,
+    'Disgust': 0,
+    'Distress': 0,
+    'Doubt': 0,
+    'Ecstasy': 0,
+    'Embarrassment': 0,
+    'Empathic Pain': 0,
+    'Entrancement': 0,
+    'Envy': 0,
+    'Excitement': 0,
+    'Fear': 0,
+    'Guilt': 0,
+    'Horror': 0,
+    'Interest': 0,
+    'Joy': 0,
+    'Love': 0,
+    'Nostalgia': 0,
+    'Pain': 0,
+    'Pride': 0,
+    'Realization': 0,
+    'Relief': 0,
+    'Romance': 0,
+    'Sadness': 0,
+    'Satisfaction': 0,
+    'Shame': 0,
+    'Surprise (negative)': 0,
+    'Surprise (positive)': 0,
+    'Sympathy': 0,
+    'Tiredness': 0,
+    'Triumph': 0
+  }
+
   const [roundOneData, setRoundOneData] = useState({"big5_personality_analysis": {"agreeableness":0, "conscientiousness": 0, "extroversion": 0, "neuroticism": 0, "openness": 0}, "big_five_insights": "Loading...", "big_five_recommendations": "Loading..."});
-  const [roundTwoData, setRoundTwoData] = useState({"confidenceResult": "Loading...", "transcription": "Loading...", "question": "Loading..."});
+  const [roundTwoData, setRoundTwoData] = useState({"confidenceResult": "Loading...", "transcription": "Loading...", "question": "Loading...", "emotionScores": scores_dict});
   const [roundThreeData, setRoundThreeData] = useState({"q_a": {}, "answers": "Loading...", "evaluation": {}});
   const name = localStorage.getItem('CandidateNameForReport')
   const email = localStorage.getItem('CandidateEmailForReport')
@@ -63,6 +116,8 @@ export default function CandidateReport() {
 if (!roundOneData || !roundTwoData || !roundThreeData) {
   return <div>Loading...</div>; // Placeholder for loading state
 }
+
+const { emotionScores } = roundTwoData;
 
 
   return (
@@ -126,13 +181,13 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
                   <div className="grid gap-2">
                     <div className="font-semibold">Insights</div>
                     <div>
-                    {roundOneData.big_five_insights}
+                    {renderInsights(roundOneData.big_five_insights)}
                     </div>
                   </div>
-                  <div className="grid gap-2">
+                  <div className="grid gap-2 mt-7">
                     <div className="font-semibold">Recommendations</div>
                     <div>
-                    {roundOneData.big_five_recommendations}
+                    {renderInsights(roundOneData.big_five_recommendations)}
                     </div>
                   </div>
                 </div>
@@ -152,19 +207,19 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
                 <div className="grid gap-2">
                   <div className="font-semibold">Question Asked</div>
                   <div>
-                  {roundTwoData.question}
+                  {renderInsights(roundTwoData.question)}
                   </div>
                 </div>
                 <div className="grid gap-2">
                   <div className="font-semibold">Video Transcription</div>
                   <div>
-                  {roundTwoData.transcription}
+                  {renderInsights(roundTwoData.transcription)}
                   </div>
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-2 mt-7">
                   <div className="font-semibold">Insights</div>
                   <div>
-                  {roundTwoData.confidenceResult}
+                  {renderInsights(roundTwoData.confidenceResult)}
                   </div>
                 </div>
               </CardContent>
@@ -179,7 +234,7 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 mt-7">
                   <CardTitle>Question asked and the corresponding answer given by {name}.</CardTitle>
                   <CardDescription className='mt-3'>
                   {roundThreeData.q_a && (
@@ -197,16 +252,16 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
                   </CardDescription>
                 </div>
                 <div className="grid gap-4">
-                  <div className="font-semibold">Evaluation</div>
+                  <div className="font-semibold mt-7">Evaluation</div>
                   <div>
 
                   {roundThreeData.evaluation && (
                   <div className="grid gap-4">
                     {Object.entries(roundThreeData.evaluation).map(([question, feedback], index) => (
-                      <div key={index}>
+                      <div className='mt-5' key={index}>
                         <div className="font-semibold">Question: {question}</div>
-                        <div className="font-semibold">Feedback:</div>
-                        <div>{feedback}</div>
+                        <div className="font-semibold mt-3">Feedback about the Answer:</div>
+                        <div>{renderInsights(feedback)}</div>
                       </div>
                     ))}
                   </div>
@@ -236,25 +291,33 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-center">
-                    <BarChart className="w-full aspect-[1/1]" />
+                    <BarChart className="w-full aspect-[1/1]"  op={roundOneData.big5_personality_analysis.openness} con={roundOneData.big5_personality_analysis.conscientiousness} ext={roundOneData.big5_personality_analysis.extroversion} agr={roundOneData.big5_personality_analysis.agreeableness} neu={roundOneData.big5_personality_analysis.neuroticism} />
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Emotional Analysis</CardTitle>
-                    <CardDescription>
-                      An emotional heatmap showing the distribution of emotions in {name}’s video.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <img
-                      alt="Emotional heatmap"
-                      className="aspect-video overflow-hidden rounded-lg object-cover"
-                      height="225"
-                      src="/placeholder.svg"
-                      width="400"
-                    />
-                  </CardContent>
+                <CardHeader>
+                  <CardTitle>Emotional Analysis</CardTitle>
+                  <CardDescription>An emotional heatmap showing the distribution of emotions.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                  <Plot
+                    data={[
+                      {
+                        z: [Object.values(emotionScores)],
+                        x: Object.keys(emotionScores),
+                        y: Object.values(emotionScores),
+                        type: 'heatmap',
+                        colorscale: 'Viridis',
+                      },
+                    ]}
+                    layout={{
+                      title: 'Emotion Scores Heatmap',
+                      xaxis: { title: 'Emotion', automargin: true},
+                      yaxis: { title: 'Score' },
+                    }}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </CardContent>
                 </Card>
               </CardContent>
             </Card>
@@ -262,15 +325,17 @@ if (!roundOneData || !roundTwoData || !roundThreeData) {
           <section>
             <Card className="w-full">
               <CardHeader>
-                <CardTitle>Parsed Resume</CardTitle>
+                <CardTitle>Resume for reference</CardTitle>
                 <CardDescription>
-                  View the parsed resume for additional information about {name}’s qualifications and experience.
+                  View the resume for additional information about {name}’s qualifications and experience.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
+              <a href="/Muhammed-Basith-Resume-I_page-0001.jpg" download="Muhammed-Basith-Resume-I_page-0001.jpg">
                 <Button className="w-[200px]" variant="outline">
-                  View Parsed Resume
+                  View Resume
                 </Button>
+              </a>
               </CardContent>
             </Card>
           </section>
@@ -396,17 +461,22 @@ function TrendingDownIcon(props) {
 }
 
 
-function BarChart(props) {
+function BarChart({ op, con, ext, agr, neu, ...props }) {
+  const openness = parseFloat(op);
+  const conscientiousness = parseFloat(con);
+  const extraversion = parseFloat(ext);
+  const agreeableness = parseFloat(agr);
+  const neuroticism = parseFloat(neu);
+
   return (
     <div {...props}>
       <ResponsiveBar
         data={[
-          { name: "Jan", count: 111 },
-          { name: "Feb", count: 157 },
-          { name: "Mar", count: 129 },
-          { name: "Apr", count: 150 },
-          { name: "May", count: 119 },
-          { name: "Jun", count: 72 },
+          { name: "Openness", count: openness },
+          { name: "Conscientiousness", count: conscientiousness },
+          { name: "Extraversion", count: extraversion },
+          { name: "Agreeableness", count: agreeableness },
+          { name: "Neuroticism", count: neuroticism },
         ]}
         keys={["count"]}
         indexBy="name"
@@ -419,10 +489,10 @@ function BarChart(props) {
         }}
         axisLeft={{
           tickSize: 0,
-          tickValues: 4,
           tickPadding: 16,
         }}
-        gridYValues={4}
+        gridYValues={5} // Adjusted to display numbers from 1 to 5 on the y-axis
+        height={1000} // Adjusted height
         theme={{
           tooltip: {
             chip: {
@@ -446,5 +516,46 @@ function BarChart(props) {
         ariaLabel="A bar chart showing data"
       />
     </div>
-  )
+  );
+}
+
+
+
+function renderInsights(text) {
+  // Split the text based on '**' delimiter
+  try{
+  const parts = text.split('**');
+  // Initialize an array to hold processed parts
+  const renderedParts = [];
+  // Iterate through parts
+  for (let i = 0; i < parts.length; i++) {
+    // Check if index is even (outside the '**')
+    if (i % 2 === 0) {
+      // If even, check for ':' delimiter
+      const colonIndex = parts[i].indexOf(':');
+      if (colonIndex !== -1) {
+        // If ':' found, split the text and add line break
+        const beforeColon = parts[i].substring(0, colonIndex);
+        const afterColon = parts[i].substring(colonIndex + 1);
+        renderedParts.push(
+          <span key={i}>
+            {beforeColon}
+            <br />
+            {afterColon}
+          </span>
+        );
+      } else {
+        // If ':' not found, wrap the text in <strong> tag
+        renderedParts.push(<span key={i}>{parts[i]}</span>);
+      }
+    } else {
+      // If odd, leave the text as it is (inside the '**')
+      renderedParts.push(<strong key={i}>{parts[i]}</strong>);
+    }
+  }
+  // Return the rendered parts joined together
+  return renderedParts;
+}catch{
+  return text
+}
 }
