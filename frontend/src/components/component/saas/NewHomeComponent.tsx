@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import theme from '../../../theme';
 import { Footer } from "../layout/footer";
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import Spline from '@splinetool/react-spline';
 import {
   Container,
   Box,
@@ -172,7 +173,8 @@ const HeroSection: React.FC = () => {
                   priority
                 /> */}
                     <FallInPlace delay={1}>
-                    <VideoPlayer src="/cubic2.mp4" width={1000} height={400} />
+                    {/* <VideoPlayer src="/cubic2.mp4" width={1000} height={400} /> */}
+                    <Spline scene="https://prod.spline.design/4366cyCaBSQ4dkzX/scene.splinecode" />
                     </FallInPlace>
               </Box>
             </FallInPlace>
