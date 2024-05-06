@@ -1,10 +1,14 @@
 import os
 import json
-import google.generativeai as genai
+import random
 import requests
 from flask import jsonify
-import asyncio
+import moviepy
 import moviepy.video.io.ffmpeg_tools
+import google.generativeai as genai
+from hume import HumeBatchClient
+from hume.models.config import FaceConfig
+import cv2
 
 json_file_path = 'keys.json'
 
@@ -22,9 +26,105 @@ authorization_whisper = keys_data['Authorization_Whisper']
 print(authorization_whisper)
 
 
+
+
 def process_video(temp_video_path, interview_name, email, db, question):
     output_audio_path = r'./uploads/audio/extracted_audio.flac'
+    screenshots_dir = f'./uploads/screenshots/{email}/'
+
     try:
+
+        os.makedirs(screenshots_dir, exist_ok=True)
+        cap = cv2.VideoCapture(temp_video_path)
+        frame_numbers = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        count = 0
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            count += 1
+            if count in frame_numbers:
+                frame_path = os.path.join(screenshots_dir, f"{count}.jpg")
+                cv2.imwrite(frame_path, frame)  # Save frame as JPEG
+            
+            if count >= max(frame_numbers):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+        print('Frames extracted and saved successfully')
+
+
+        client = HumeBatchClient(humeAPI)
+        filepaths = [os.path.join(screenshots_dir, f"{frame_number}.jpg") for frame_number in frame_numbers]
+        config = FaceConfig()
+        job = client.submit_job(None, [config], files=filepaths)
+
+        print(job)
+        print("Running...")
+
+        details = job.await_complete()
+        job.download_predictions(f"./uploads/screenshots/{email}/predictions.json")
+        print("Predictions downloaded to predictions.json")
+
+
+
+        with open(f"./uploads/screenshots/{email}/predictions.json", 'r') as file:
+            predictions_data = json.load(file)
+
+        emotions_analysis = {}
+
+        # Iterate through each prediction (image) in the predictions data
+        for i in range(len(predictions_data)):
+            if 'results' in predictions_data[i] and 'predictions' in predictions_data[i]['results']:
+                predictions = predictions_data[i]['results']['predictions']
+
+                if len(predictions) > 0:
+                    prediction = predictions[0]  # Assuming there's only one prediction per image
+                    if 'models' in prediction and 'face' in prediction['models']:
+                        face_models = prediction['models']['face']
+                        if 'grouped_predictions' in face_models and len(face_models['grouped_predictions']) > 0:
+                            grouped_predictions = face_models['grouped_predictions'][0]  # Assuming only one group
+                            if 'predictions' in grouped_predictions and len(grouped_predictions['predictions']) > 0:
+                                emotions = grouped_predictions['predictions'][0]['emotions']
+
+                                # Create a dictionary to store emotions for the current image
+                                image_emotions = {}
+
+                                # Iterate through each detected emotion
+                                for emotion in emotions:
+                                    emotion_name = emotion['name']
+                                    emotion_score = emotion['score']
+                                    image_emotions[emotion_name] = emotion_score
+
+                                # Update emotions_analysis with the current image's emotions
+                                emotions_analysis[f'image{i+1}'] = image_emotions
+
+
+        total_scores = {}
+        count_emotions = {}
+
+        # Iterate over each image's emotions in the emotions_analysis dictionary
+        for image_emotions in emotions_analysis.values():
+            for emotion, score in image_emotions.items():
+                if emotion in total_scores:
+                    total_scores[emotion] += score
+                    count_emotions[emotion] += 1
+                else:
+                    total_scores[emotion] = score
+                    count_emotions[emotion] = 1
+
+        # Calculate average scores for each emotion
+        average_scores = {}
+        for emotion, total_score in total_scores.items():
+            count = count_emotions[emotion]
+            average_scores[emotion] = total_score / count
+
+
+    
+
         try:
             temp = moviepy.video.io.ffmpeg_tools.ffmpeg_extract_audio(temp_video_path, output_audio_path)
             print("Audio extraction successful!")
@@ -88,7 +188,8 @@ def process_video(temp_video_path, interview_name, email, db, question):
             'submitted': True,
             'transcription': response.json()['text'],
             'question': question,
-            'confidenceResult': confidence_result
+            'confidenceResult': confidence_result,
+            'emotionScores': average_scores,
         }
 
         print(updated_round_two)
@@ -101,16 +202,3 @@ def process_video(temp_video_path, interview_name, email, db, question):
     except Exception as e:
         print('Error processing video:', e)
 
-
-
-def audio_hume(file_path):
-
-    file_path = file_path
-    async def main(file_path):
-        client = HumeStreamClient(humeAPI)
-        config = ProsodyConfig()
-        async with client.connect([config]) as socket:
-            result = await socket.send_file(file_path)
-            print(result)
-
-    asyncio.run(main())
