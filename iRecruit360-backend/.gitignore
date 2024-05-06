@@ -3,3 +3,5 @@ iRecruit360-backend.iml
 .idea
 iRecruit360BackendVenv
 keys.json
+venv
+__pycache__

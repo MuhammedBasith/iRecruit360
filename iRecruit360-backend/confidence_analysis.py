@@ -3,6 +3,7 @@ import json
 import google.generativeai as genai
 import requests
 from flask import jsonify
+import asyncio
 import moviepy.video.io.ffmpeg_tools
 
 json_file_path = 'keys.json'
@@ -12,11 +13,13 @@ with open(json_file_path, 'r') as file:
 
 
 genai_api = keys_data['genai_api']
-
+humeAPI = keys_data['humeAPI']
+humeSecret = keys_data['humeSecret']
 genai.configure(api_key=genai_api)
 
 api_url = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
 authorization_whisper = keys_data['Authorization_Whisper']
+print(authorization_whisper)
 
 
 def process_video(temp_video_path, interview_name, email, db, question):
@@ -32,9 +35,12 @@ def process_video(temp_video_path, interview_name, email, db, question):
         with open(r'./uploads/audio/extracted_audio.flac', "rb") as f:
             audio_data = f.read()
 
+
         # Whisper API request
         headers = {"Authorization": authorization_whisper}
         response = requests.post(api_url, headers=headers, data=audio_data)
+        print("-------")
+        print(response)
 
         # Optionally handle response from Whisper API
         if response.ok:
@@ -95,3 +101,16 @@ def process_video(temp_video_path, interview_name, email, db, question):
     except Exception as e:
         print('Error processing video:', e)
 
+
+
+def audio_hume(file_path):
+
+    file_path = file_path
+    async def main(file_path):
+        client = HumeStreamClient(humeAPI)
+        config = ProsodyConfig()
+        async with client.connect([config]) as socket:
+            result = await socket.send_file(file_path)
+            print(result)
+
+    asyncio.run(main())
