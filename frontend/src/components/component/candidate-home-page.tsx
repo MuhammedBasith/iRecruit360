@@ -44,18 +44,31 @@ export default function CandidateHomePage() {
       });
 
       if (response.data.success) {
-        console.log(response.data)
-        // Extract interview details from the response
-        const interviewName = response.data.interviews[0].interview_name;
-        const interviewDateTime = response.data.interviews[0].interview_datetime;
-        const candidate_name_data = response.data.interviews[0].candidate_name;
-      
-        // Store interview details in local storage
-        localStorage.setItem('interviewName', interviewName);
-        localStorage.setItem('candidate_name', candidate_name_data);
-        localStorage.setItem('interviewDateTime', interviewDateTime);
-      
-        router.push('/candidate/interview-details');
+        if (response.data.interviews[0].interview_attended){
+          // Extract interview details from the response
+          const interviewName = response.data.interviews[0].interview_name;
+          const interviewDateTime = response.data.interviews[0].interview_datetime;
+          const candidate_name_data = response.data.interviews[0].candidate_name;
+        
+          // Store interview details in local storage
+          localStorage.setItem('interviewName', interviewName);
+          localStorage.setItem('candidate_name', candidate_name_data);
+          localStorage.setItem('interviewDateTime', interviewDateTime);
+        
+          router.push('/candidate/interview-attended');
+        }else{
+          const interviewName = response.data.interviews[0].interview_name;
+          const interviewDateTime = response.data.interviews[0].interview_datetime;
+          const candidate_name_data = response.data.interviews[0].candidate_name;
+        
+          // Store interview details in local storage
+          localStorage.setItem('interviewName', interviewName);
+          localStorage.setItem('candidate_name', candidate_name_data);
+          localStorage.setItem('interviewDateTime', interviewDateTime);
+        
+          router.push('/candidate/interview-details');
+        }
+
       } else {
         // Display error toast for incorrect code
         setClicked(true)
