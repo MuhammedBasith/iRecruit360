@@ -201,55 +201,71 @@ def send_email(candidateName, candidateEmail, interviewName, secretCode, dateAnd
 
         # Your HTML template with placeholders
         html_template = """
-        <html>
-          <head>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                background-color: #f2f2f2;
-                margin: 0;
-                padding: 0;
-              }
-              .container {
-                text-align: center;
-                margin-top: 50px;
-                background-color: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-              }
-              .heading {
-                font-size: 24px;
-                font-weight: bold;
-                color: #333333;
-              }
-              .content {
-                margin-top: 20px;
-                font-size: 16px;
-                color: #666666;
-              }
-              .code {
-                font-size: 32px;
-                font-weight: bold;
-                color: #ff0000; /* Red color for the code */
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1 class="heading">iRecruit360</h1>
-              <div class="content">
-                <p>Dear [Candidate Name],</p>
-                <p>Congratulations! You have been invited to participate in the interview for the position of [Interview Name] at [Company Name].</p>
-                <p>Your secret code for the interview is: <br /><span class="code">[Secret Code]</span></p>
-                <p>The interview is scheduled for [Date and Time].</p>
-                <p>We wish you the best of luck!</p>
-                <p>Team Edforma</p>
-              </div>
-            </div>
-          </body>
-        </html>
-        """
+            <html>
+            <head>
+                <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f2f2f2;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 50px auto;
+                    background-color: #ffffff;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                }
+                .heading {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #333333;
+                }
+                .content {
+                    margin-top: 20px;
+                    font-size: 16px;
+                    color: #666666;
+                }
+                .code {
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #ff0000; /* Red color for the code */
+                }
+                .instruction {
+                    text-align: center;
+                    margin-top: 20px;
+                    font-size: 14px;
+                    color: #999999;
+                }
+                .instruction a {
+                    color: #007bff;
+                    text-decoration: none;
+                }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                <h1 class="heading">iRecruit360</h1>
+                <div class="content">
+                    <p>Dear [Candidate Name],</p>
+                    <p>Congratulations! You have been invited to participate in the interview for the position of [Interview Name] at [Company Name].</p>
+                    <p>Your secret code for the interview is: <br /><span class="code">[Secret Code]</span></p>
+                    <p>The interview is scheduled for [Date and Time].</p>
+                    <p>We wish you the best of luck!</p>
+                    <p>Team Edforma</p>
+                </div>
+                <div class="instruction">
+                    <p>If you haven‘t created an account on iRecruit360, please make sure to do so before attending the interview. You can <a href="http://localhost:3000/signup">click here</a> to create an account.</p>
+                </div>
+                </div>
+            </body>
+            </html>
+            """
+
+
 
         html_content = html_template.replace("[Candidate Name]", candidate_name)
         html_content = html_content.replace("[Interview Name]", interview_name)
@@ -537,11 +553,13 @@ def verify_interview_code():
                 print(interview_data)
                 interview_name = interview_data.get('interview_name')
                 interview_datetime = interview_data.get('scheduled_datetime')
+                interview_attended = candidate_data.get('round_three').get("submitted")
 
                 interviews.append({
                     'candidate_name': candidate_name,
                     'interview_name': interview_name,
-                    'interview_datetime': interview_datetime
+                    'interview_datetime': interview_datetime,
+                    'interview_attended': interview_attended
                 })
 
         if interviews:
