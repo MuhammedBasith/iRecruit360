@@ -153,27 +153,27 @@ const { emotionScores } = roundTwoData;
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
                       <div className="font-semibold">Openness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.openness})</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.openness}/5)</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
                       <div className="font-semibold">Conscientiousness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.conscientiousness})</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.conscientiousness}/5)</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingDownIcon className="h-4 w-4" />
                       <div className="font-semibold">Extraversion</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.extroversion})</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.extroversion}/5)</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingDownIcon className="h-4 w-4" />
                       <div className="font-semibold">Agreeableness</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.agreeableness})</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.agreeableness}/5)</div>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <TrendingUpIcon className="h-4 w-4" />
                       <div className="font-semibold">Neuroticism</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.neuroticism})</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">(Score: {roundOneData.big5_personality_analysis.neuroticism}/5)</div>
                     </div>
                   </div>
                 </div>
