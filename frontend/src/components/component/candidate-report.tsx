@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar"
 import { ResponsiveBar } from "@nivo/bar"
 import { Textarea } from "@/components/ui/textarea"
 import Plot from 'react-plotly.js';
+import MarkdownRenderer from '../../components/MarkdownRenderer';
 
 
 export default function CandidateReport() {
@@ -181,13 +182,15 @@ const { emotionScores } = roundTwoData;
                   <div className="grid gap-2">
                     <div className="font-semibold">Insights</div>
                     <div>
-                    {renderInsights(roundOneData.big_five_insights)}
+                    {/* {renderInsights(roundOneData.big_five_insights)} */}
+                    <MarkdownRenderer content={roundOneData.big_five_insights} />
                     </div>
                   </div>
                   <div className="grid gap-2 mt-7">
                     <div className="font-semibold">Recommendations</div>
                     <div>
-                    {renderInsights(roundOneData.big_five_recommendations)}
+                    {/* {renderInsights(roundOneData.big_five_recommendations)} */}
+                    <MarkdownRenderer content={roundOneData.big_five_recommendations} />
                     </div>
                   </div>
                 </div>
@@ -207,19 +210,22 @@ const { emotionScores } = roundTwoData;
                 <div className="grid gap-2">
                   <div className="font-semibold">Question Asked</div>
                   <div>
-                  {renderInsights(roundTwoData.question)}
+                  {/* {renderInsights(roundTwoData.question)} */}
+                  <MarkdownRenderer content={roundTwoData.question} />
                   </div>
                 </div>
                 <div className="grid gap-2">
                   <div className="font-semibold">Video Transcription</div>
                   <div>
-                  {renderInsights(roundTwoData.transcription)}
+                  {/* {renderInsights(roundTwoData.transcription)} */}
+                  <MarkdownRenderer content={roundTwoData.transcription} />
                   </div>
                 </div>
                 <div className="grid gap-2 mt-7">
                   <div className="font-semibold">Insights</div>
                   <div>
-                  {renderInsights(roundTwoData.confidenceResult)}
+                  {/* {renderInsights(roundTwoData.confidenceResult)} */}
+                  <MarkdownRenderer content={roundTwoData.confidenceResult} />
                   </div>
                 </div>
               </CardContent>
@@ -261,7 +267,8 @@ const { emotionScores } = roundTwoData;
                       <div className='mt-5' key={index}>
                         <div className="font-semibold">Question: {question}</div>
                         <div className="font-semibold mt-3">Feedback about the Answer:</div>
-                        <div>{renderInsights(feedback)}</div>
+                        {/* <div>{renderInsights(feedback)}</div> */}
+                        <MarkdownRenderer content={feedback} />
                       </div>
                     ))}
                   </div>
