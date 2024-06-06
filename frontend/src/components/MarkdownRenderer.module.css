@@ -1,0 +1,42 @@
+/* components/MarkdownRenderer.module.css */
+
+.markdown h1 {
+  color: #333;
+}
+
+.markdown h2 {
+  color: #555;
+}
+
+.markdown p {
+  line-height: 1.6;
+}
+
+.markdown code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #000;
+}
+
+.markdown pre {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.markdown th {
+  background-color: #f2f2f2;
+}
